@@ -62,7 +62,7 @@ SD_Ajans/
 
 1. **Projeyi klonlayın:**
    ```bash
-   git clone <repo-url>
+   git clone https://github.com/SametDulger/SD_Ajans.git
    cd SD_Ajans
    ```
 
