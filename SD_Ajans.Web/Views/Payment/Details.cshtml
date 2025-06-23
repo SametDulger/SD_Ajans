@@ -1,0 +1,149 @@
+@model SD_Ajans.Core.Entities.Payment
+
+@{
+    ViewData["Title"] = "Ödeme Detayı";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Ödeme Detayı</h2>
+    <div>
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+            <i class="fas fa-edit"></i> Düzenle
+        </a>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Geri Dön
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5>Ödeme Bilgileri</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <dl class="row">
+                            <dt class="col-sm-4">Manken:</dt>
+                            <dd class="col-sm-8">@Model.Assignment?.Manken?.FirstName @Model.Assignment?.Manken?.LastName</dd>
+                            
+                            <dt class="col-sm-4">Organizasyon:</dt>
+                            <dd class="col-sm-8">@Model.Assignment?.Organization?.Name</dd>
+                            
+                            <dt class="col-sm-4">Tutar:</dt>
+                            <dd class="col-sm-8">@Model.Amount.ToString("C")</dd>
+                            
+                            <dt class="col-sm-4">Ödeme Türü:</dt>
+                            <dd class="col-sm-8">
+                                @switch (Model.PaymentType)
+                                {
+                                    case SD_Ajans.Core.Entities.PaymentType.Cash:
+                                        <span class="badge bg-success">Nakit</span>
+                                        break;
+                                    case SD_Ajans.Core.Entities.PaymentType.BankTransfer:
+                                        <span class="badge bg-primary">Banka Transferi</span>
+                                        break;
+                                    case SD_Ajans.Core.Entities.PaymentType.CreditCard:
+                                        <span class="badge bg-info">Kredi Kartı</span>
+                                        break;
+                                }
+                            </dd>
+                        </dl>
+                    </div>
+                    <div class="col-md-6">
+                        <dl class="row">
+                            <dt class="col-sm-4">Ödeme Tarihi:</dt>
+                            <dd class="col-sm-8">@Model.PaymentDate.ToString("dd/MM/yyyy")</dd>
+                            
+                            <dt class="col-sm-4">Durum:</dt>
+                            <dd class="col-sm-8">
+                                @switch (Model.Status)
+                                {
+                                    case SD_Ajans.Core.Entities.PaymentStatus.Pending:
+                                        <span class="badge bg-warning">Bekliyor</span>
+                                        break;
+                                    case SD_Ajans.Core.Entities.PaymentStatus.Completed:
+                                        <span class="badge bg-success">Tamamlandı</span>
+                                        break;
+                                    case SD_Ajans.Core.Entities.PaymentStatus.Cancelled:
+                                        <span class="badge bg-danger">İptal Edildi</span>
+                                        break;
+                                }
+                            </dd>
+                            
+                            <dt class="col-sm-4">Oluşturan:</dt>
+                            <dd class="col-sm-8">@Model.CreatedBy?.FirstName @Model.CreatedBy?.LastName</dd>
+                            
+                            <dt class="col-sm-4">Oluşturma Tarihi:</dt>
+                            <dd class="col-sm-8">@Model.CreatedAt.ToShortDateString()</dd>
+                        </dl>
+                    </div>
+                </div>
+                
+                @if (!string.IsNullOrEmpty(Model.Notes))
+                {
+                    <div class="mt-3">
+                        <h6>Notlar:</h6>
+                        <p>@Model.Notes</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Görevlendirme Bilgileri</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-4">Başlangıç:</dt>
+                    <dd class="col-sm-8">@Model.Assignment?.StartTime.ToString("dd/MM/yyyy HH:mm")</dd>
+                    
+                    <dt class="col-sm-4">Bitiş:</dt>
+                    <dd class="col-sm-8">@Model.Assignment?.EndTime.ToString("dd/MM/yyyy HH:mm")</dd>
+                    
+                    <dt class="col-sm-4">Ücret:</dt>
+                    <dd class="col-sm-8">@Model.Assignment?.Fee.ToString("C")</dd>
+                    
+                    <dt class="col-sm-4">Durum:</dt>
+                    <dd class="col-sm-8">
+                        @switch (Model.Assignment?.Status)
+                        {
+                            case SD_Ajans.Core.Entities.AssignmentStatus.Scheduled:
+                                <span class="badge bg-warning">Planlandı</span>
+                                break;
+                            case SD_Ajans.Core.Entities.AssignmentStatus.InProgress:
+                                <span class="badge bg-info">Devam Ediyor</span>
+                                break;
+                            case SD_Ajans.Core.Entities.AssignmentStatus.Completed:
+                                <span class="badge bg-success">Tamamlandı</span>
+                                break;
+                            case SD_Ajans.Core.Entities.AssignmentStatus.Cancelled:
+                                <span class="badge bg-danger">İptal Edildi</span>
+                                break;
+                        }
+                    </dd>
+                </dl>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5>Manken İletişim</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-4">Email:</dt>
+                    <dd class="col-sm-8">@Model.Assignment?.Manken?.Email</dd>
+                    
+                    <dt class="col-sm-4">Telefon:</dt>
+                    <dd class="col-sm-8">@Model.Assignment?.Manken?.Phone</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div> 

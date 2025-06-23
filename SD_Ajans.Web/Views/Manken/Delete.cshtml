@@ -1,0 +1,85 @@
+@model SD_Ajans.Core.Entities.Manken
+
+@{
+    ViewData["Title"] = "Manken Sil";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Manken Sil</h2>
+    <a asp-action="Index" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Geri Dön
+    </a>
+</div>
+
+<div class="alert alert-danger">
+    <h4>Bu mankeni silmek istediğinizden emin misiniz?</h4>
+    <p>Bu işlem geri alınamaz.</p>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5>Manken Bilgileri</h5>
+    </div>
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">Ad Soyad:</dt>
+            <dd class="col-sm-9">@Model.FirstName @Model.LastName</dd>
+            
+            <dt class="col-sm-3">Email:</dt>
+            <dd class="col-sm-9">@Model.Email</dd>
+            
+            <dt class="col-sm-3">Telefon:</dt>
+            <dd class="col-sm-9">@Model.Phone</dd>
+            
+            <dt class="col-sm-3">Cinsiyet:</dt>
+            <dd class="col-sm-9">
+                @switch (Model.Gender)
+                {
+                    case SD_Ajans.Core.Entities.Gender.Male:
+                        <span class="badge bg-primary">Erkek</span>
+                        break;
+                    case SD_Ajans.Core.Entities.Gender.Female:
+                        <span class="badge bg-pink">Kadın</span>
+                        break;
+                    case SD_Ajans.Core.Entities.Gender.Child:
+                        <span class="badge bg-warning">Çocuk</span>
+                        break;
+                }
+            </dd>
+            
+            <dt class="col-sm-3">Kategori:</dt>
+            <dd class="col-sm-9">
+                @switch (Model.Category)
+                {
+                    case SD_Ajans.Core.Entities.MankenCategory.Category1:
+                        <span class="badge bg-success">Kategori 1</span>
+                        break;
+                    case SD_Ajans.Core.Entities.MankenCategory.Category2:
+                        <span class="badge bg-info">Kategori 2</span>
+                        break;
+                    case SD_Ajans.Core.Entities.MankenCategory.Category3:
+                        <span class="badge bg-warning">Kategori 3</span>
+                        break;
+                }
+            </dd>
+            
+            <dt class="col-sm-3">Şehir:</dt>
+            <dd class="col-sm-9">@Model.City</dd>
+            
+            <dt class="col-sm-3">Kayıt Tarihi:</dt>
+            <dd class="col-sm-9">@Model.CreatedAt.ToShortDateString()</dd>
+        </dl>
+    </div>
+</div>
+
+<form asp-action="Delete" method="post">
+    <input type="hidden" asp-for="Id" />
+    <div class="d-flex justify-content-end mt-3">
+        <a asp-action="Index" class="btn btn-secondary me-2">
+            <i class="fas fa-times"></i> İptal
+        </a>
+        <button type="submit" class="btn btn-danger">
+            <i class="fas fa-trash"></i> Sil
+        </button>
+    </div>
+</form> 

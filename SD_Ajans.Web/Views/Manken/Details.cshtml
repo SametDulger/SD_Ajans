@@ -1,0 +1,159 @@
+@model SD_Ajans.Core.Entities.Manken
+
+@{
+    ViewData["Title"] = "Manken Detayı";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Manken Detayı</h2>
+    <div>
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+            <i class="fas fa-edit"></i> Düzenle
+        </a>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Geri Dön
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Fotoğraf</h5>
+            </div>
+            <div class="card-body text-center">
+                @if (!string.IsNullOrEmpty(Model.PhotoPath))
+                {
+                    <img src="@Model.PhotoPath" class="img-fluid rounded" alt="Manken Fotoğrafı" style="max-height: 300px; width: 100%; object-fit: cover;">
+                }
+                else
+                {
+                    <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 300px;">
+                        <div class="text-muted">
+                            <i class="fas fa-user fa-3x mb-3"></i>
+                            <p>Fotoğraf yok</p>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5>Kişisel Bilgiler</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <dl class="row">
+                            <dt class="col-sm-4">Ad Soyad:</dt>
+                            <dd class="col-sm-8">@Model.FirstName @Model.LastName</dd>
+                            
+                            <dt class="col-sm-4">Email:</dt>
+                            <dd class="col-sm-8">@Model.Email</dd>
+                            
+                            <dt class="col-sm-4">Telefon:</dt>
+                            <dd class="col-sm-8">@Model.Phone</dd>
+                            
+                            <dt class="col-sm-4">Doğum Tarihi:</dt>
+                            <dd class="col-sm-8">@Model.BirthDate.ToShortDateString()</dd>
+                            
+                            <dt class="col-sm-4">Cinsiyet:</dt>
+                            <dd class="col-sm-8">
+                                @switch (Model.Gender)
+                                {
+                                    case SD_Ajans.Core.Entities.Gender.Male:
+                                        <span class="badge bg-primary">Erkek</span>
+                                        break;
+                                    case SD_Ajans.Core.Entities.Gender.Female:
+                                        <span class="badge bg-pink">Kadın</span>
+                                        break;
+                                    case SD_Ajans.Core.Entities.Gender.Child:
+                                        <span class="badge bg-warning">Çocuk</span>
+                                        break;
+                                }
+                            </dd>
+                        </dl>
+                    </div>
+                    <div class="col-md-6">
+                        <dl class="row">
+                            <dt class="col-sm-4">Boy:</dt>
+                            <dd class="col-sm-8">@Model.Height cm</dd>
+                            
+                            <dt class="col-sm-4">Kilo:</dt>
+                            <dd class="col-sm-8">@Model.Weight kg</dd>
+                            
+                            <dt class="col-sm-4">Saç Rengi:</dt>
+                            <dd class="col-sm-8">@Model.HairColor</dd>
+                            
+                            <dt class="col-sm-4">Göz Rengi:</dt>
+                            <dd class="col-sm-8">@Model.EyeColor</dd>
+                            
+                            <dt class="col-sm-4">Şehir:</dt>
+                            <dd class="col-sm-8">@Model.City</dd>
+                            
+                            <dt class="col-sm-4">Kategori:</dt>
+                            <dd class="col-sm-8">
+                                @switch (Model.Category)
+                                {
+                                    case SD_Ajans.Core.Entities.MankenCategory.Category1:
+                                        <span class="badge bg-success">Kategori 1 (40 TL/gün)</span>
+                                        break;
+                                    case SD_Ajans.Core.Entities.MankenCategory.Category2:
+                                        <span class="badge bg-info">Kategori 2 (100 TL/gün)</span>
+                                        break;
+                                    case SD_Ajans.Core.Entities.MankenCategory.Category3:
+                                        <span class="badge bg-warning">Kategori 3 (%20)</span>
+                                        break;
+                                }
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+                
+                @if (!string.IsNullOrEmpty(Model.Description))
+                {
+                    <div class="mt-3">
+                        <h6>Açıklama:</h6>
+                        <p>@Model.Description</p>
+                    </div>
+                }
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5>Durum Bilgileri</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <strong>Müsaitlik Durumu:</strong>
+                    @if (Model.IsAvailable)
+                    {
+                        <span class="badge bg-success">Müsait</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger">Meşgul</span>
+                    }
+                </div>
+                
+                <div class="mb-3">
+                    <strong>Kayıt Tarihi:</strong><br>
+                    @Model.CreatedAt.ToShortDateString()
+                </div>
+                
+                @if (Model.UpdatedAt.HasValue)
+                {
+                    <div class="mb-3">
+                        <strong>Son Güncelleme:</strong><br>
+                        @Model.UpdatedAt.Value.ToShortDateString()
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div> 

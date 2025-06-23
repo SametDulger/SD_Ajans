@@ -1,0 +1,111 @@
+@{
+    ViewData["Title"] = "Finansal Raporlar";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Finansal Raporlar</h2>
+    <a asp-action="Index" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Geri Dön
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">Toplam Gelir</h5>
+                        <h3>@ViewBag.TotalIncome.ToString("C")</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-arrow-up fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card bg-danger text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">Toplam Gider</h5>
+                        <h3>@ViewBag.TotalExpense.ToString("C")</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-arrow-down fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">Net Kar</h5>
+                        <h3>@ViewBag.NetProfit.ToString("C")</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-chart-line fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5>Rapor Dönemi: @ViewBag.StartDate.ToShortDateString() - @ViewBag.EndDate.ToShortDateString()</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Gelir Analizi</h6>
+                        <ul class="list-group">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Toplam Gelir
+                                <span class="badge bg-success rounded-pill">@ViewBag.TotalIncome.ToString("C")</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Gider Analizi</h6>
+                        <ul class="list-group">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Toplam Gider
+                                <span class="badge bg-danger rounded-pill">@ViewBag.TotalExpense.ToString("C")</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="row">
+                    <div class="col-12">
+                        <h6>Kar Analizi</h6>
+                        <div class="alert @(ViewBag.NetProfit >= 0 ? "alert-success" : "alert-danger")">
+                            <strong>Net Kar/Zarar:</strong> @ViewBag.NetProfit.ToString("C")
+                            @if (ViewBag.NetProfit >= 0)
+                            {
+                                <i class="fas fa-smile text-success"></i>
+                            }
+                            else
+                            {
+                                <i class="fas fa-frown text-danger"></i>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 

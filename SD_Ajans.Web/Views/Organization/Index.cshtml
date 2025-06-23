@@ -1,0 +1,96 @@
+@model IEnumerable<SD_Ajans.Core.Entities.Organization>
+
+@{
+    ViewData["Title"] = "Organizasyonlar";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Organizasyonlar</h2>
+    <a asp-action="Create" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Yeni Organizasyon
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Organizasyon Adı</th>
+                        <th>Tarih</th>
+                        <th>Konum</th>
+                        <th>Tür</th>
+                        <th>Bütçe</th>
+                        <th>Durum</th>
+                        <th>İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.Name</td>
+                            <td>@item.Date.ToShortDateString()</td>
+                            <td>@item.Location</td>
+                            <td>
+                                @switch (item.Type)
+                                {
+                                    case SD_Ajans.Core.Entities.OrganizationType.CosmeticPromotion:
+                                        <span class="badge bg-primary">Kozmetik Tanıtım</span>
+                                        break;
+                                    case SD_Ajans.Core.Entities.OrganizationType.CeremonyHostess:
+                                        <span class="badge bg-success">Tören Hostesi</span>
+                                        break;
+                                    case SD_Ajans.Core.Entities.OrganizationType.HolidayAnimation:
+                                        <span class="badge bg-warning">Tatil Animasyonu</span>
+                                        break;
+                                    case SD_Ajans.Core.Entities.OrganizationType.ConcertEvent:
+                                        <span class="badge bg-info">Konser Etkinliği</span>
+                                        break;
+                                    case SD_Ajans.Core.Entities.OrganizationType.Other:
+                                        <span class="badge bg-secondary">Diğer</span>
+                                        break;
+                                }
+                            </td>
+                            <td>@item.TotalBudget.ToString("C")</td>
+                            <td>
+                                @switch (item.Status)
+                                {
+                                    case SD_Ajans.Core.Entities.OrganizationStatus.Planned:
+                                        <span class="badge bg-warning">Planlandı</span>
+                                        break;
+                                    case SD_Ajans.Core.Entities.OrganizationStatus.InProgress:
+                                        <span class="badge bg-info">Devam Ediyor</span>
+                                        break;
+                                    case SD_Ajans.Core.Entities.OrganizationStatus.Completed:
+                                        <span class="badge bg-success">Tamamlandı</span>
+                                        break;
+                                    case SD_Ajans.Core.Entities.OrganizationStatus.Cancelled:
+                                        <span class="badge bg-danger">İptal Edildi</span>
+                                        break;
+                                }
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-warning">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a asp-action="Profit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-success">
+                                        <i class="fas fa-chart-line"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div> 

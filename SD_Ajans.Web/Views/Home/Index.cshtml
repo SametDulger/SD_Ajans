@@ -1,0 +1,556 @@
+﻿@{
+    ViewData["Title"] = "Ana Sayfa";
+}
+
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="container">
+        <div class="row align-items-center min-vh-100">
+            <div class="col-lg-6">
+                <div class="hero-content fade-in-up">
+                    <h1 class="display-3 fw-bold text-white mb-4">
+                        SD Ajans
+                    </h1>
+                    <h2 class="h3 text-white-50 mb-4">
+                        Profesyonel Model ve Promotör Ajansı
+                    </h2>
+                    <p class="lead text-white-75 mb-5">
+                        Türkiye'nin önde gelen model ve promotör ajanslarından biri olarak, 
+                        markalarınız için en uygun modelleri buluyor, organizasyonlarınızı 
+                        mükemmel şekilde yönetiyoruz.
+                    </p>
+                    <div class="hero-buttons">
+                        <a href="#services" class="btn btn-primary btn-lg me-3">
+                            <i class="fas fa-star me-2"></i>Hizmetlerimiz
+                        </a>
+                        <a href="#contact" class="btn btn-outline-light btn-lg">
+                            <i class="fas fa-phone me-2"></i>İletişim
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="hero-image fade-in-up" style="animation-delay: 0.3s;">
+                    <div class="floating-card">
+                        <i class="fas fa-users fa-4x text-primary"></i>
+                        <h4 class="mt-3">Profesyonel Modeller</h4>
+                        <p class="text-muted">Deneyimli ve kaliteli model kadromuz</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- İstatistikler -->
+<section class="stats-section py-5">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="stats-card text-center">
+                    <div class="stats-icon primary mb-3">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3 class="fw-bold text-primary">@ViewBag.TotalMankens+</h3>
+                    <p class="text-muted mb-0">Kayıtlı Model</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stats-card text-center">
+                    <div class="stats-icon success mb-3">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <h3 class="fw-bold text-success">@ViewBag.TotalOrganizations+</h3>
+                    <p class="text-muted mb-0">Tamamlanan Organizasyon</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stats-card text-center">
+                    <div class="stats-icon info mb-3">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h3 class="fw-bold text-info">5+</h3>
+                    <p class="text-muted mb-0">Yıllık Deneyim</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stats-card text-center">
+                    <div class="stats-icon warning mb-3">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <h3 class="fw-bold text-warning">100%</h3>
+                    <p class="text-muted mb-0">Müşteri Memnuniyeti</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Hakkımızda -->
+<section id="about" class="about-section py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <div class="about-content">
+                    <h2 class="section-title mb-4">Hakkımızda</h2>
+                    <p class="lead text-muted mb-4">
+                        SD Ajans olarak, 2020 yılından bu yana Türkiye'nin önde gelen 
+                        model ve promotör ajanslarından biri olarak hizmet vermekteyiz.
+                    </p>
+                    <p class="mb-4">
+                        Profesyonel ekibimiz ve geniş model portföyümüz ile markalarınızın 
+                        ihtiyaçlarına en uygun çözümleri sunuyoruz. Organizasyonlarınızın 
+                        başarısı için çalışıyor, her detayı özenle planlıyoruz.
+                    </p>
+                    <div class="about-features">
+                        <div class="feature-item">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <span>Profesyonel model kadrosu</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <span>Organizasyon yönetimi</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <span>Müşteri memnuniyeti odaklı hizmet</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="about-image">
+                    <div class="image-card">
+                        <i class="fas fa-building fa-3x text-primary"></i>
+                        <h4 class="mt-3">Profesyonel Ajans</h4>
+                        <p class="text-muted">Güvenilir ve kaliteli hizmet</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Hizmetler -->
+<section id="services" class="services-section py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="section-title">Hizmetlerimiz</h2>
+            <p class="lead text-muted">Size sunduğumuz profesyonel hizmetler</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6">
+                <div class="service-card">
+                    <div class="service-icon primary mb-3">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    <h4>Model Yönetimi</h4>
+                    <p class="text-muted">
+                        Profesyonel modellerimiz ile markalarınızın ihtiyaçlarına 
+                        en uygun çözümleri sunuyoruz.
+                    </p>
+                    <ul class="service-features">
+                        <li><i class="fas fa-check text-success me-2"></i>Kategori bazlı model seçimi</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Fiziksel özellik filtreleme</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Profesyonel portföy</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="service-card">
+                    <div class="service-icon success mb-3">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <h4>Organizasyon Yönetimi</h4>
+                    <p class="text-muted">
+                        Etkinliklerinizi profesyonel şekilde planlıyor ve 
+                        mükemmel sonuçlar elde ediyoruz.
+                    </p>
+                    <ul class="service-features">
+                        <li><i class="fas fa-check text-success me-2"></i>Detaylı planlama</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Zaman yönetimi</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Koordinasyon</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="service-card">
+                    <div class="service-icon info mb-3">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h4>Muhasebe ve Raporlama</h4>
+                    <p class="text-muted">
+                        Finansal süreçlerinizi şeffaf şekilde yönetiyor ve 
+                        detaylı raporlar sunuyoruz.
+                    </p>
+                    <ul class="service-features">
+                        <li><i class="fas fa-check text-success me-2"></i>Otomatik hesaplama</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Detaylı raporlar</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Kar-zarar analizi</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Neden Biz -->
+<section class="why-us-section py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="section-title">Neden SD Ajans?</h2>
+            <p class="lead text-muted">Bizi tercih etmeniz için nedenler</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="why-us-card text-center">
+                    <div class="why-us-icon primary mb-3">
+                        <i class="fas fa-award"></i>
+                    </div>
+                    <h5>Kalite</h5>
+                    <p class="text-muted">En yüksek kalite standartlarında hizmet</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="why-us-card text-center">
+                    <div class="why-us-icon success mb-3">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h5>Hızlı</h5>
+                    <p class="text-muted">Zamanında ve hızlı çözümler</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="why-us-card text-center">
+                    <div class="why-us-icon info mb-3">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <h5>Güvenilir</h5>
+                    <p class="text-muted">Güvenilir ve şeffaf iş ortaklığı</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="why-us-card text-center">
+                    <div class="why-us-icon warning mb-3">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                    <h5>Destek</h5>
+                    <p class="text-muted">7/24 müşteri desteği</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- İletişim -->
+<section id="contact" class="contact-section py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="section-title">İletişim</h2>
+            <p class="lead text-muted">Bizimle iletişime geçin</p>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="contact-card">
+                    <div class="row g-4">
+                        <div class="col-md-4">
+                            <div class="contact-item text-center">
+                                <div class="contact-icon primary mb-3">
+                                    <i class="fas fa-phone"></i>
+                                </div>
+                                <h5>Telefon</h5>
+                                <p class="text-muted mb-0">+90 (212) 555 0123</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="contact-item text-center">
+                                <div class="contact-icon success mb-3">
+                                    <i class="fas fa-envelope"></i>
+                                </div>
+                                <h5>E-posta</h5>
+                                <p class="text-muted mb-0">info@sdajans.com</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="contact-item text-center">
+                                <div class="contact-icon info mb-3">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                </div>
+                                <h5>Adres</h5>
+                                <p class="text-muted mb-0">İstanbul, Türkiye</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="hero-pattern" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="2" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="2" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="1" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="1" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23hero-pattern)"/></svg>');
+        pointer-events: none;
+    }
+    
+    .hero-content {
+        position: relative;
+        z-index: 2;
+    }
+    
+    .hero-image {
+        position: relative;
+        z-index: 2;
+    }
+    
+    .floating-card {
+        background: white;
+        border-radius: 1.5rem;
+        padding: 2rem 1.5rem;
+        text-align: center;
+        box-shadow: var(--shadow-lg);
+        animation: float 6s ease-in-out infinite;
+    }
+    
+    @@keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+    }
+    
+    .section-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--dark-color);
+        margin-bottom: 1rem;
+    }
+    
+    .stats-section {
+        background: white;
+    }
+    
+    .stats-card {
+        background: white;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-sm);
+        transition: all 0.3s ease;
+        height: 100%;
+        border: 1px solid var(--border-color);
+    }
+    
+    .stats-card:hover {
+        box-shadow: var(--shadow-lg);
+        transform: translateY(-3px);
+        border-color: var(--primary-color);
+    }
+    
+    .stats-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+        margin: 0 auto 1rem;
+    }
+    
+    .stats-icon.primary { background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%); }
+    .stats-icon.success { background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%); }
+    .stats-icon.info { background: linear-gradient(135deg, var(--info-color) 0%, #2563eb 100%); }
+    .stats-icon.warning { background: linear-gradient(135deg, var(--warning-color) 0%, #d97706 100%); }
+    
+    .about-section {
+        background: white;
+    }
+    
+    .about-features {
+        margin-top: 1.5rem;
+    }
+    
+    .feature-item {
+        margin-bottom: 0.75rem;
+        font-size: 1rem;
+    }
+    
+    .image-card {
+        background: white;
+        border-radius: 1.5rem;
+        padding: 2rem 1.5rem;
+        text-align: center;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+    }
+    
+    .services-section {
+        background: var(--light-color);
+    }
+    
+    .service-card {
+        background: white;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-sm);
+        transition: all 0.3s ease;
+        height: 100%;
+        text-align: center;
+        border: 1px solid var(--border-color);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .service-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    }
+    
+    .service-card:hover {
+        box-shadow: var(--shadow-lg);
+        transform: translateY(-3px);
+        border-color: var(--primary-color);
+    }
+    
+    .service-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+        margin: 0 auto 1rem;
+    }
+    
+    .service-features {
+        list-style: none;
+        padding: 0;
+        margin-top: 1rem;
+        text-align: left;
+    }
+    
+    .service-features li {
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .why-us-section {
+        background: white;
+    }
+    
+    .why-us-card {
+        background: white;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-sm);
+        transition: all 0.3s ease;
+        height: 100%;
+        border: 1px solid var(--border-color);
+        text-align: center;
+    }
+    
+    .why-us-card:hover {
+        box-shadow: var(--shadow-lg);
+        transform: translateY(-3px);
+        border-color: var(--primary-color);
+    }
+    
+    .why-us-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        color: white;
+        margin: 0 auto 1rem;
+    }
+    
+    .contact-section {
+        background: var(--light-color);
+    }
+    
+    .contact-card {
+        background: white;
+        border-radius: 1.5rem;
+        padding: 2rem 1.5rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+    }
+    
+    .contact-item {
+        padding: 1rem;
+    }
+    
+    .contact-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        color: white;
+        margin: 0 auto 0.75rem;
+    }
+    
+    .fade-in-up {
+        animation: fadeInUp 0.8s ease-out;
+    }
+    
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @@media (max-width: 768px) {
+        .hero-section {
+            min-height: auto;
+            padding: 3rem 0;
+        }
+        
+        .section-title {
+            font-size: 2rem;
+        }
+        
+        .floating-card {
+            margin-top: 2rem;
+            padding: 1.5rem 1rem;
+        }
+        
+        .stats-card,
+        .service-card,
+        .why-us-card {
+            padding: 1rem;
+        }
+        
+        .contact-card {
+            padding: 1.5rem 1rem;
+        }
+    }
+</style>

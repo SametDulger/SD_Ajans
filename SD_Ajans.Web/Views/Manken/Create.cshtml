@@ -1,0 +1,159 @@
+@model SD_Ajans.Core.Entities.Manken
+
+@{
+    ViewData["Title"] = "Yeni Manken";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Yeni Manken Ekle</h2>
+    <a asp-action="Index" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Geri Dön
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form asp-action="Create" method="post" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="FirstName" class="form-label">Ad</label>
+                        <input asp-for="FirstName" class="form-control" />
+                        <span asp-validation-for="FirstName" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="LastName" class="form-label">Soyad</label>
+                        <input asp-for="LastName" class="form-control" />
+                        <span asp-validation-for="LastName" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label">Email</label>
+                        <input asp-for="Email" type="email" class="form-control" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="Phone" class="form-label">Telefon</label>
+                        <input asp-for="Phone" class="form-control" />
+                        <span asp-validation-for="Phone" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label asp-for="BirthDate" class="form-label">Doğum Tarihi</label>
+                        <input asp-for="BirthDate" type="date" class="form-control" />
+                        <span asp-validation-for="BirthDate" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label asp-for="Gender" class="form-label">Cinsiyet</label>
+                        <select asp-for="Gender" class="form-select">
+                            <option value="">Seçiniz</option>
+                            <option value="0">Erkek</option>
+                            <option value="1">Kadın</option>
+                            <option value="2">Çocuk</option>
+                        </select>
+                        <span asp-validation-for="Gender" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label asp-for="Category" class="form-label">Kategori</label>
+                        <select asp-for="Category" class="form-select">
+                            <option value="">Seçiniz</option>
+                            <option value="1">Kategori 1 (40 TL/gün)</option>
+                            <option value="2">Kategori 2 (100 TL/gün)</option>
+                            <option value="3">Kategori 3 (%20)</option>
+                        </select>
+                        <span asp-validation-for="Category" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="mb-3">
+                        <label asp-for="Height" class="form-label">Boy (cm)</label>
+                        <input asp-for="Height" type="number" class="form-control" />
+                        <span asp-validation-for="Height" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="mb-3">
+                        <label asp-for="Weight" class="form-label">Kilo (kg)</label>
+                        <input asp-for="Weight" type="number" class="form-control" />
+                        <span asp-validation-for="Weight" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="mb-3">
+                        <label asp-for="HairColor" class="form-label">Saç Rengi</label>
+                        <input asp-for="HairColor" class="form-control" />
+                        <span asp-validation-for="HairColor" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="mb-3">
+                        <label asp-for="EyeColor" class="form-label">Göz Rengi</label>
+                        <input asp-for="EyeColor" class="form-control" />
+                        <span asp-validation-for="EyeColor" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="City" class="form-label">Şehir</label>
+                        <input asp-for="City" class="form-control" />
+                        <span asp-validation-for="City" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="IsAvailable" class="form-label">Müsaitlik Durumu</label>
+                        <div class="form-check">
+                            <input asp-for="IsAvailable" class="form-check-input" />
+                            <label asp-for="IsAvailable" class="form-check-label">Müsait</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Description" class="form-label">Açıklama</label>
+                <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label for="photo" class="form-label">Fotoğraf</label>
+                <input type="file" id="photo" name="photo" class="form-control" accept="image/*" />
+                <div class="form-text">JPG, PNG veya GIF formatında, maksimum 5MB</div>
+            </div>
+
+            <div class="d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Kaydet
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+} 

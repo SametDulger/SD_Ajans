@@ -1,0 +1,470 @@
+@{
+    ViewData["Title"] = "Muhasebe";
+    var monthlyRevenue = ViewBag.MonthlyRevenue as Dictionary<string, decimal> ?? new Dictionary<string, decimal>();
+    var monthlyExpenses = ViewBag.MonthlyExpenses as Dictionary<string, decimal> ?? new Dictionary<string, decimal>();
+    var totalRevenue = monthlyRevenue.Values.Sum();
+    var totalExpenses = monthlyExpenses.Values.Sum();
+    var netProfit = totalRevenue - totalExpenses;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Muhasebe</h2>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-calculator"></i> Ücret Hesaplama</h5>
+            </div>
+            <div class="card-body">
+                <form id="feeCalculationForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="mankenId" class="form-label">Manken</label>
+                                <select id="mankenId" name="mankenId" class="form-select" required>
+                                    <option value="">Manken Seçin</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="organizationId" class="form-label">Organizasyon</label>
+                                <select id="organizationId" name="organizationId" class="form-select" required>
+                                    <option value="">Organizasyon Seçin</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="numberOfDays" class="form-label">Gün Sayısı</label>
+                                <input type="number" id="numberOfDays" name="numberOfDays" class="form-control" min="1" value="1" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="includesMeal" name="includesMeal">
+                                    <label class="form-check-label" for="includesMeal">
+                                        Yemek Dahil
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="includesAccommodation" name="includesAccommodation">
+                                    <label class="form-check-label" for="includesAccommodation">
+                                        Konaklama Dahil
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-calculator"></i> Hesapla
+                    </button>
+                </form>
+                
+                <div id="feeResult" class="mt-3" style="display: none;">
+                    <div class="card border-primary">
+                        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0"><i class="fas fa-calculator"></i> Hesaplama Sonucu</h6>
+                            <button type="button" class="btn btn-sm btn-outline-light" onclick="closeResult()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div id="feeDetails"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-line"></i> @ViewBag.CurrentYear Yılı Finansal Özet</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-6">
+                        <h6 class="text-success">Toplam Gelir</h6>
+                        <h4>@totalRevenue.ToString("C")</h4>
+                    </div>
+                    <div class="col-6">
+                        <h6 class="text-danger">Toplam Gider</h6>
+                        <h4>@totalExpenses.ToString("C")</h4>
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-12">
+                        <h6 class="text-primary">Net Kar</h6>
+                        <h3>@netProfit.ToString("C")</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5><i class="fas fa-history"></i> Hesaplama Geçmişi</h5>
+                <div class="d-flex align-items-center gap-2 pagination-controls">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="previousPage()" id="prevBtn" disabled>
+                        <i class="fas fa-chevron-left"></i> Önceki
+                    </button>
+                    <span id="pageInfo" class="badge bg-primary px-3 py-2">Sayfa 1</span>
+                    <button type="button" class="btn btn-sm btn-primary" onclick="nextPage()" id="nextBtn">
+                        Sonraki <i class="fas fa-chevron-right"></i>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="clearAllCalculations()" disabled>
+                        <i class="fas fa-trash"></i> Tümünü Temizle
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="calculationHistory">
+                    <p class="text-muted">Henüz hesaplama yapılmamış.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-building"></i> Organizasyon Kar Analizi</h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">Organizasyon bazlı kar/zarar analizi yapın.</p>
+                <a asp-action="OrganizationProfit" asp-route-organizationId="1" class="btn btn-primary">
+                    <i class="fas fa-chart-pie"></i> Kar Analizi
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-bar"></i> Maliyet Analizi</h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">Organizasyon maliyetlerini detaylı analiz edin.</p>
+                <a asp-action="CostAnalysis" asp-route-organizationId="1" class="btn btn-primary">
+                    <i class="fas fa-search-dollar"></i> Maliyet Analizi
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let currentCalculation = null;
+        let currentPage = 1;
+        const itemsPerPage = 4;
+        
+        $(document).ready(function() {
+            // Manken ve organizasyon listelerini yükle
+            loadMankens();
+            loadOrganizations();
+            
+            // Ücret hesaplama formu
+            $('#feeCalculationForm').on('submit', function(e) {
+                e.preventDefault();
+                calculateFee();
+            });
+            
+            // Sayfa yüklendiğinde geçmiş hesaplamaları göster
+            loadCalculationHistory();
+        });
+        
+        function loadMankens() {
+            $.get('/Manken/GetAllMankens', function(data) {
+                var select = $('#mankenId');
+                select.empty();
+                select.append('<option value="">Manken Seçin</option>');
+                
+                data.forEach(function(manken) {
+                    select.append('<option value="' + manken.id + '">' + manken.firstName + ' ' + manken.lastName + '</option>');
+                });
+            }).fail(function(xhr) {
+                alert('Manken listesi yüklenemedi: ' + xhr.status + ' ' + xhr.statusText);
+            });
+        }
+        
+        function loadOrganizations() {
+            $.get('/Organization/GetAllOrganizations', function(data) {
+                var select = $('#organizationId');
+                select.empty();
+                select.append('<option value="">Organizasyon Seçin</option>');
+                
+                data.forEach(function(org) {
+                    select.append('<option value="' + org.id + '">' + org.name + '</option>');
+                });
+            }).fail(function(xhr) {
+                alert('Organizasyon listesi yüklenemedi: ' + xhr.status + ' ' + xhr.statusText);
+            });
+        }
+        
+        function getAntiForgeryToken() {
+            return $('input[name="__RequestVerificationToken"]').val();
+        }
+        
+        function calculateFee() {
+            var mankenId = $('#mankenId').val();
+            var organizationId = $('#organizationId').val();
+            var numberOfDays = $('#numberOfDays').val();
+            var includesMeal = $('#includesMeal').is(':checked');
+            var includesAccommodation = $('#includesAccommodation').is(':checked');
+            
+            if (!mankenId || !organizationId || !numberOfDays) {
+                alert('Lütfen gerekli alanları doldurun.');
+                return;
+            }
+            
+            $.ajax({
+                url: '/Accounting/CalculateFee',
+                type: 'POST',
+                data: {
+                    mankenId: mankenId,
+                    organizationId: organizationId,
+                    numberOfDays: numberOfDays,
+                    includesMeal: includesMeal,
+                    includesAccommodation: includesAccommodation,
+                    __RequestVerificationToken: getAntiForgeryToken()
+                },
+                success: function(data) {
+                    if (data.success) {
+                        currentCalculation = {
+                            mankenId: mankenId,
+                            organizationId: organizationId,
+                            numberOfDays: numberOfDays,
+                            includesMeal: includesMeal,
+                            includesAccommodation: includesAccommodation,
+                            result: data,
+                            timestamp: new Date().toLocaleString('tr-TR')
+                        };
+                        
+                        // Sonucu göster ve kalıcı yap
+                        $('#feeResult').show();
+                        $('#feeDetails').html(
+                            '<ul class="list-unstyled mb-0">' +
+                            '<li><strong>Günlük Ücret:</strong> ' + data.dailyRate.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' }) + '</li>' +
+                            '<li><strong>Toplam Ücret:</strong> ' + data.totalPayment.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' }) + '</li>' +
+                            '<li><strong>Yemek Maliyeti:</strong> ' + data.mealCost.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' }) + '</li>' +
+                            '<li><strong>Konaklama Maliyeti:</strong> ' + data.accommodationCost.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' }) + '</li>' +
+                            '<li><strong>Ajans Komisyonu (%15):</strong> ' + data.fee.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' }) + '</li>' +
+                            '<li><strong>Net Kazanç:</strong> ' + data.profit.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' }) + '</li>' +
+                            '</ul>'
+                        );
+                        
+                        // Sonucu localStorage'a otomatik kaydet
+                        saveCalculationSilently();
+                    } else {
+                        $('#feeResult').show();
+                        $('#feeDetails').html('<span class="text-danger">' + (data.message || 'Hesaplama başarısız.') + '</span>');
+                    }
+                },
+                error: function(xhr) {
+                    $('#feeResult').show();
+                    $('#feeDetails').html('<span class="text-danger">Hesaplama sırasında hata oluştu: ' + xhr.status + ' ' + xhr.statusText + '</span>');
+                }
+            });
+        }
+        
+        function saveCalculationSilently() {
+            if (!currentCalculation) {
+                return;
+            }
+            
+            var calculations = JSON.parse(localStorage.getItem('feeCalculations') || '[]');
+            calculations.unshift(currentCalculation);
+            
+            // Maksimum 20 hesaplama sakla
+            if (calculations.length > 20) {
+                calculations = calculations.slice(0, 20);
+            }
+            
+            localStorage.setItem('feeCalculations', JSON.stringify(calculations));
+            loadCalculationHistory();
+        }
+        
+        function saveCalculation() {
+            if (!currentCalculation) {
+                return;
+            }
+            
+            // Sessiz kaydetme işlemi
+            saveCalculationSilently();
+            
+            // Görsel geri bildirim
+            var saveButton = $('button[onclick="saveCalculation()"]');
+            var originalText = saveButton.html();
+            saveButton.html('<i class="fas fa-check"></i> Kaydedildi').addClass('btn-success').removeClass('btn-outline-success');
+            
+            setTimeout(function() {
+                saveButton.html(originalText).removeClass('btn-success').addClass('btn-outline-success');
+            }, 2000);
+        }
+        
+        function loadCalculationHistory() {
+            var calculations = JSON.parse(localStorage.getItem('feeCalculations') || '[]');
+            var historyDiv = $('#calculationHistory');
+            
+            if (calculations.length === 0) {
+                historyDiv.html('<p class="text-muted">Henüz hesaplama yapılmamış.</p>');
+                updatePaginationControls(0);
+                return;
+            }
+            
+            // Sayfalama hesaplamaları
+            var totalPages = Math.ceil(calculations.length / itemsPerPage);
+            var startIndex = (currentPage - 1) * itemsPerPage;
+            var endIndex = Math.min(startIndex + itemsPerPage, calculations.length);
+            var pageCalculations = calculations.slice(startIndex, endIndex);
+            
+            var html = '<div class="row">';
+            pageCalculations.forEach(function(calc, index) {
+                var actualIndex = startIndex + index;
+                var mankenName = $('#mankenId option[value="' + calc.mankenId + '"]').text() || 'Bilinmeyen Manken';
+                var orgName = $('#organizationId option[value="' + calc.organizationId + '"]').text() || 'Bilinmeyen Organizasyon';
+                
+                html += '<div class="col-md-6 mb-3">' +
+                    '<div class="card border-0 shadow-sm">' +
+                    '<div class="card-header bg-gradient-primary text-white d-flex justify-content-between align-items-center">' +
+                    '<small><i class="fas fa-clock me-1"></i>' + calc.timestamp + '</small>' +
+                    '<button type="button" class="btn btn-sm btn-outline-light" onclick="deleteCalculation(' + actualIndex + ')">' +
+                    '<i class="fas fa-trash"></i></button>' +
+                    '</div>' +
+                    '<div class="card-body">' +
+                    '<h6 class="card-title text-primary mb-2">' + mankenName + ' - ' + orgName + '</h6>' +
+                    '<p class="card-text text-muted mb-3"><small><i class="fas fa-calendar me-1"></i>Gün: ' + calc.numberOfDays + 
+                    (calc.includesMeal ? ' | <i class="fas fa-utensils me-1"></i>Yemek' : '') +
+                    (calc.includesAccommodation ? ' | <i class="fas fa-bed me-1"></i>Konaklama' : '') + '</small></p>' +
+                    '<div class="row text-center">' +
+                    '<div class="col-6"><strong class="text-success">Toplam Ücret</strong><br>' +
+                    '<span class="h6 text-success">' + calc.result.totalPayment.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' }) + '</span></div>' +
+                    '<div class="col-6"><strong class="text-info">Net Kazanç</strong><br>' +
+                    '<span class="h6 text-info">' + calc.result.profit.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' }) + '</span></div>' +
+                    '</div>' +
+                    '</div>' +
+                    '</div>' +
+                    '</div>';
+            });
+            html += '</div>';
+            
+            historyDiv.html(html);
+            updatePaginationControls(calculations.length);
+        }
+        
+        function updatePaginationControls(totalItems) {
+            var totalPages = Math.ceil(totalItems / itemsPerPage);
+            var pageInfo = $('#pageInfo');
+            var prevBtn = $('#prevBtn');
+            var nextBtn = $('#nextBtn');
+            var clearAllBtn = $('button[onclick="clearAllCalculations()"]');
+            
+            // Sayfa bilgisini sadece birden fazla sayfa olduğunda göster
+            if (totalPages > 1) {
+                pageInfo.text('Sayfa ' + currentPage + ' / ' + totalPages).show();
+            } else {
+                pageInfo.hide();
+            }
+            
+            // Tümünü Temizle butonunu sadece veri olduğunda aktif hale getir
+            if (totalItems > 0) {
+                clearAllBtn.prop('disabled', false).removeClass('btn-outline-secondary').addClass('btn-outline-danger');
+            } else {
+                clearAllBtn.prop('disabled', true).removeClass('btn-outline-danger').addClass('btn-outline-secondary');
+            }
+            
+            prevBtn.prop('disabled', currentPage <= 1);
+            nextBtn.prop('disabled', currentPage >= totalPages);
+            
+            // Önceki butonunun rengini ayarla
+            if (currentPage <= 1) {
+                prevBtn.removeClass('btn-primary').addClass('btn-outline-secondary');
+            } else {
+                prevBtn.removeClass('btn-outline-secondary').addClass('btn-primary');
+            }
+            
+            // Sonraki butonunun rengini ayarla
+            if (currentPage >= totalPages) {
+                nextBtn.removeClass('btn-primary').addClass('btn-outline-secondary');
+            } else {
+                nextBtn.removeClass('btn-outline-secondary').addClass('btn-primary');
+            }
+        }
+        
+        function previousPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                loadCalculationHistory();
+            }
+        }
+        
+        function nextPage() {
+            var calculations = JSON.parse(localStorage.getItem('feeCalculations') || '[]');
+            var totalPages = Math.ceil(calculations.length / itemsPerPage);
+            
+            if (currentPage < totalPages) {
+                currentPage++;
+                loadCalculationHistory();
+            }
+        }
+        
+        function deleteCalculation(index) {
+            if (confirm('Bu hesaplamayı silmek istediğinizden emin misiniz?')) {
+                var calculations = JSON.parse(localStorage.getItem('feeCalculations') || '[]');
+                calculations.splice(index, 1);
+                localStorage.setItem('feeCalculations', JSON.stringify(calculations));
+                
+                // Eğer mevcut sayfa boşsa ve önceki sayfa varsa, önceki sayfaya git
+                var totalPages = Math.ceil(calculations.length / itemsPerPage);
+                if (currentPage > totalPages && currentPage > 1) {
+                    currentPage--;
+                }
+                
+                loadCalculationHistory();
+            }
+        }
+        
+        function clearCurrentResult() {
+            // Sonucu gizleme, sadece mevcut hesaplama verisini temizle
+            currentCalculation = null;
+            // Form alanlarını temizle
+            $('#feeCalculationForm')[0].reset();
+            $('#mankenId').val('');
+            $('#organizationId').val('');
+        }
+        
+        function clearAllCalculations() {
+            if (confirm('Tüm hesaplama geçmişini silmek istediğinizden emin misiniz?')) {
+                localStorage.removeItem('feeCalculations');
+                currentPage = 1;
+                loadCalculationHistory();
+            }
+        }
+        
+        function closeResult() {
+            $('#feeResult').hide();
+            currentCalculation = null;
+        }
+    </script>
+    @Html.AntiForgeryToken()
+} 

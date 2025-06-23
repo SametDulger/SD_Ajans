@@ -1,0 +1,160 @@
+@using System.Linq
+@{
+    ViewData["Title"] = "Maliyet Analizi";
+    var organization = ViewBag.Organization as SD_Ajans.Core.Entities.Organization;
+    var costAnalysis = ViewBag.CostAnalysis;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Maliyet Analizi</h2>
+    <a asp-controller="Accounting" asp-action="Index" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Muhasebe
+    </a>
+</div>
+
+@if (organization != null)
+{
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-building"></i> @organization.Name</h5>
+                </div>
+                <div class="card-body">
+                    @if (costAnalysis != null)
+                    {
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="card bg-danger text-white">
+                                    <div class="card-body text-center">
+                                        <h6>Toplam Bütçe</h6>
+                                        <h4>@costAnalysis.TotalBudget.ToString("C")</h4>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-warning text-dark">
+                                    <div class="card-body text-center">
+                                        <h6>Toplam Maliyet</h6>
+                                        <h4>@costAnalysis.TotalCosts.ToString("C")</h4>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-info text-white">
+                                    <div class="card-body text-center">
+                                        <h6>Kalan Bütçe</h6>
+                                        <h4>@costAnalysis.RemainingBudget.ToString("C")</h4>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-success text-white">
+                                    <div class="card-body text-center">
+                                        <h6>Maliyet Oranı</h6>
+                                        <h4>@costAnalysis.CostPercentage.ToString("F1")%</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h6>Maliyet Dağılımı</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Kategori</th>
+                                                <th>Toplam Maliyet</th>
+                                                <th>Yüzde</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @if (costAnalysis.CostBreakdown != null && costAnalysis.CostBreakdown.Count > 0)
+                                            {
+                                                foreach (var breakdown in costAnalysis.CostBreakdown)
+                                                {
+                                                    var percentage = costAnalysis.TotalCosts > 0 ? (breakdown.Value / costAnalysis.TotalCosts * 100) : 0;
+                                                    <tr>
+                                                        <td>@breakdown.Key</td>
+                                                        <td class="text-danger">@breakdown.Value.ToString("C")</td>
+                                                        <td>@percentage.ToString("F1")%</td>
+                                                    </tr>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <tr>
+                                                    <td colspan="3" class="text-center text-muted">Henüz maliyet verisi bulunmamaktadır.</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h6>Görevlendirme Detayları</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Manken</th>
+                                                <th>Başlangıç</th>
+                                                <th>Bitiş</th>
+                                                <th>Gün Sayısı</th>
+                                                <th>Günlük Ücret</th>
+                                                <th>Yemek</th>
+                                                <th>Konaklama</th>
+                                                <th>Toplam</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @if (costAnalysis.Assignments != null && costAnalysis.Assignments.Count > 0)
+                                            {
+                                                foreach (var assignment in costAnalysis.Assignments)
+                                                {
+                                                    <tr>
+                                                        <td>@assignment.Manken?.FirstName @assignment.Manken?.LastName</td>
+                                                        <td>@assignment.StartTime.ToString("dd.MM.yyyy")</td>
+                                                        <td>@assignment.EndTime.ToString("dd.MM.yyyy")</td>
+                                                        <td>@assignment.NumberOfDays</td>
+                                                        <td>@assignment.DailyRate.ToString("C")</td>
+                                                        <td>@assignment.MealCost.ToString("C")</td>
+                                                        <td>@assignment.AccommodationCost.ToString("C")</td>
+                                                        <td class="text-danger fw-bold">@assignment.TotalPayment.ToString("C")</td>
+                                                    </tr>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <tr>
+                                                    <td colspan="8" class="text-center text-muted">Henüz görevlendirme bulunmamaktadır.</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> Bu organizasyon için henüz maliyet analizi verisi bulunmamaktadır.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-warning">
+        <i class="fas fa-exclamation-triangle"></i> Organizasyon bulunamadı.
+    </div>
+} 
