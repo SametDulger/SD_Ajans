@@ -1,0 +1,207 @@
+@{
+    ViewData["Title"] = "Raporlar";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Raporlar</h2>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-building"></i> Organizasyon Raporları</h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">Organizasyon bazlı detaylı raporlar oluşturun.</p>
+                <form asp-action="DownloadOrganizationReport" method="get">
+                    <div class="mb-3">
+                        <label for="organizationId" class="form-label">Organizasyon Seçin</label>
+                        <select name="organizationId" id="organizationId" class="form-select" required>
+                            <option value="">Organizasyon Seçin</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-download"></i> Organizasyon Raporu İndir
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-user"></i> Manken Raporları</h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">Manken bazlı performans raporları oluşturun.</p>
+                <form asp-action="DownloadMankenReport" method="get">
+                    <div class="mb-3">
+                        <label for="mankenId" class="form-label">Manken Seçin</label>
+                        <select name="mankenId" id="mankenId" class="form-select" required>
+                            <option value="">Manken Seçin</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-download"></i> Manken Raporu İndir
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-calendar-alt"></i> Aylık Raporlar</h5>
+            </div>
+            <div class="card-body">
+                <form asp-action="DownloadMonthlyReport" method="get">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="year" class="form-label">Yıl</label>
+                                <select name="year" id="year" class="form-select" required>
+                                    @for (int i = DateTime.Now.Year; i >= DateTime.Now.Year - 5; i--)
+                                    {
+                                        if (i == DateTime.Now.Year)
+                                        {
+                                            <option value="@i" selected>@i</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@i">@i</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="month" class="form-label">Ay</label>
+                                <select name="month" id="month" class="form-select" required>
+                                    @for (int m = 1; m <= 12; m++)
+                                    {
+                                        var ayAdlari = new[] { "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık" };
+                                        if (DateTime.Now.Month == m)
+                                        {
+                                            <option value="@m" selected>@ayAdlari[m-1]</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@m">@ayAdlari[m-1]</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-download"></i> Aylık Rapor İndir
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-line"></i> Finansal Raporlar</h5>
+            </div>
+            <div class="card-body">
+                <form asp-action="DownloadFinancialReport" method="get">
+                    <div class="mb-3">
+                        <label for="financialYear" class="form-label">Yıl</label>
+                        <select name="year" id="financialYear" class="form-select" required>
+                            @for (int i = DateTime.Now.Year; i >= DateTime.Now.Year - 5; i--)
+                            {
+                                if (i == DateTime.Now.Year)
+                                {
+                                    <option value="@i" selected>@i</option>
+                                }
+                                else
+                                {
+                                    <option value="@i">@i</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-download"></i> Finansal Rapor İndir
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-tasks"></i> Görevlendirme Raporları</h5>
+            </div>
+            <div class="card-body">
+                <form asp-action="DownloadAssignmentReport" method="get">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="startDate" class="form-label">Başlangıç Tarihi</label>
+                                <input type="date" name="startDate" id="startDate" class="form-control" 
+                                       value="@DateTime.Now.AddMonths(-1).ToString("yyyy-MM-dd")" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="endDate" class="form-label">Bitiş Tarihi</label>
+                                <input type="date" name="endDate" id="endDate" class="form-control" 
+                                       value="@DateTime.Now.ToString("yyyy-MM-dd")" required>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-download"></i> Görevlendirme Raporu İndir
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Manken ve organizasyon listelerini yükle
+            loadMankens();
+            loadOrganizations();
+        });
+        
+        function loadMankens() {
+            $.get('/Manken/GetAllMankens', function(data) {
+                var select = $('#mankenId');
+                select.empty();
+                select.append('<option value="">Manken Seçin</option>');
+                
+                data.forEach(function(manken) {
+                    select.append(`<option value="${manken.id}">${manken.firstName} ${manken.lastName}</option>`);
+                });
+            });
+        }
+        
+        function loadOrganizations() {
+            $.get('/Organization/GetAllOrganizations', function(data) {
+                var select = $('#organizationId');
+                select.empty();
+                select.append('<option value="">Organizasyon Seçin</option>');
+                
+                data.forEach(function(org) {
+                    select.append(`<option value="${org.id}">${org.name}</option>`);
+                });
+            });
+        }
+    </script>
+} 

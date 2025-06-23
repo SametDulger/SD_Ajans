@@ -1,0 +1,129 @@
+@model SD_Ajans.Core.Entities.Assignment
+
+@{
+    ViewData["Title"] = "Durum Güncelle";
+    var statuses = ViewBag.Statuses as SD_Ajans.Core.Entities.AssignmentStatus[];
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Görevlendirme Durumu Güncelle</h2>
+    <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Geri Dön
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5>Görevlendirme Bilgileri</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <dl class="row">
+                            <dt class="col-sm-4">Manken:</dt>
+                            <dd class="col-sm-8">@Model.Manken?.FirstName @Model.Manken?.LastName</dd>
+                            
+                            <dt class="col-sm-4">Organizasyon:</dt>
+                            <dd class="col-sm-8">@Model.Organization?.Name</dd>
+                            
+                            <dt class="col-sm-4">Başlangıç:</dt>
+                            <dd class="col-sm-8">@Model.StartTime.ToString("dd/MM/yyyy HH:mm")</dd>
+                            
+                            <dt class="col-sm-4">Bitiş:</dt>
+                            <dd class="col-sm-8">@Model.EndTime.ToString("dd/MM/yyyy HH:mm")</dd>
+                        </dl>
+                    </div>
+                    <div class="col-md-6">
+                        <dl class="row">
+                            <dt class="col-sm-4">Mevcut Durum:</dt>
+                            <dd class="col-sm-8">
+                                @switch (Model.Status)
+                                {
+                                    case SD_Ajans.Core.Entities.AssignmentStatus.Scheduled:
+                                        <span class="badge bg-warning">Planlandı</span>
+                                        break;
+                                    case SD_Ajans.Core.Entities.AssignmentStatus.InProgress:
+                                        <span class="badge bg-info">Devam Ediyor</span>
+                                        break;
+                                    case SD_Ajans.Core.Entities.AssignmentStatus.Completed:
+                                        <span class="badge bg-success">Tamamlandı</span>
+                                        break;
+                                    case SD_Ajans.Core.Entities.AssignmentStatus.Cancelled:
+                                        <span class="badge bg-danger">İptal Edildi</span>
+                                        break;
+                                }
+                            </dd>
+                            
+                            <dt class="col-sm-4">Gün Sayısı:</dt>
+                            <dd class="col-sm-8">@Model.NumberOfDays gün</dd>
+                            
+                            <dt class="col-sm-4">Toplam Ücret:</dt>
+                            <dd class="col-sm-8">@Model.TotalPayment.ToString("C")</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Durum Güncelle</h5>
+            </div>
+            <div class="card-body">
+                <form asp-action="Status" method="post">
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    
+                    <div class="mb-3">
+                        <label for="newStatus" class="form-label">Yeni Durum</label>
+                        <select name="newStatus" id="newStatus" class="form-select" required>
+                            @if (statuses != null)
+                            {
+                                @foreach (var status in statuses)
+                                {
+                                    var isSelected = status == Model.Status;
+                                    var statusText = status switch
+                                    {
+                                        SD_Ajans.Core.Entities.AssignmentStatus.Scheduled => "Planlandı",
+                                        SD_Ajans.Core.Entities.AssignmentStatus.InProgress => "Devam Ediyor",
+                                        SD_Ajans.Core.Entities.AssignmentStatus.Completed => "Tamamlandı",
+                                        SD_Ajans.Core.Entities.AssignmentStatus.Cancelled => "İptal Edildi",
+                                        _ => status.ToString()
+                                    };
+                                    
+                                    <option value="@status" selected="@isSelected">@statusText</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Durumu Güncelle
+                        </button>
+                        <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> İptal
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6>Durum Açıklamaları</h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                    <li><span class="badge bg-warning">Planlandı</span> - Görevlendirme planlandı</li>
+                    <li><span class="badge bg-info">Devam Ediyor</span> - Görevlendirme aktif</li>
+                    <li><span class="badge bg-success">Tamamlandı</span> - Görevlendirme tamamlandı</li>
+                    <li><span class="badge bg-danger">İptal Edildi</span> - Görevlendirme iptal edildi</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div> 

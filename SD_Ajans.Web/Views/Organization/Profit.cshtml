@@ -1,0 +1,19 @@
+@model decimal
+
+@{
+    ViewData["Title"] = "Kar Analizi";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Kar Analizi</h2>
+    <a asp-action="Index" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Organizasyon Listesi
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <h4>Bu organizasyonun net karı:</h4>
+        <div class="display-4 fw-bold text-success">@Model.ToString("C")</div>
+    </div>
+</div> 

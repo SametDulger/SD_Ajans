@@ -1,0 +1,101 @@
+@model IEnumerable<SD_Ajans.Core.Entities.Assignment>
+
+@{
+    ViewData["Title"] = "Görevlendirmeler";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Görevlendirmeler</h2>
+    <a asp-action="Create" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Yeni Görevlendirme
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Manken</th>
+                        <th>Organizasyon</th>
+                        <th>Tarih</th>
+                        <th>Gün Sayısı</th>
+                        <th>Toplam Ücret</th>
+                        <th>Durum</th>
+                        <th>İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                @if (item.Manken != null)
+                                {
+                                    @($"{item.Manken.FirstName} {item.Manken.LastName}")
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Manken bulunamadı</span>
+                                }
+                            </td>
+                            <td>
+                                @if (item.Organization != null)
+                                {
+                                    @item.Organization.Name
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Organizasyon bulunamadı</span>
+                                }
+                            </td>
+                            <td>
+                                @if (item.Organization != null)
+                                {
+                                    @item.Organization.Date.ToString("dd.MM.yyyy")
+                                }
+                                else
+                                {
+                                    <span class="text-muted">-</span>
+                                }
+                            </td>
+                            <td>@item.NumberOfDays gün</td>
+                            <td>@item.TotalPayment.ToString("C")</td>
+                            <td>
+                                @switch (item.Status)
+                                {
+                                    case SD_Ajans.Core.Entities.AssignmentStatus.Scheduled:
+                                        <span class="badge bg-warning">Planlandı</span>
+                                        break;
+                                    case SD_Ajans.Core.Entities.AssignmentStatus.InProgress:
+                                        <span class="badge bg-primary">Devam Ediyor</span>
+                                        break;
+                                    case SD_Ajans.Core.Entities.AssignmentStatus.Completed:
+                                        <span class="badge bg-success">Tamamlandı</span>
+                                        break;
+                                    case SD_Ajans.Core.Entities.AssignmentStatus.Cancelled:
+                                        <span class="badge bg-danger">İptal Edildi</span>
+                                        break;
+                                }
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-warning">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div> 

@@ -1,0 +1,129 @@
+@model SD_Ajans.Core.Entities.Assignment
+
+@{
+    ViewData["Title"] = "Yeni Görevlendirme";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Yeni Görevlendirme</h2>
+    <a asp-action="Index" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Geri Dön
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="MankenId" class="form-label">Manken</label>
+                        <select asp-for="MankenId" class="form-select">
+                            <option value="">Manken Seçiniz</option>
+                            @foreach (var manken in ViewBag.Mankens)
+                            {
+                                <option value="@manken.Id">@manken.FirstName @manken.LastName - @manken.Category</option>
+                            }
+                        </select>
+                        <span asp-validation-for="MankenId" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="OrganizationId" class="form-label">Organizasyon</label>
+                        <select asp-for="OrganizationId" class="form-select">
+                            <option value="">Organizasyon Seçiniz</option>
+                            @foreach (var organization in ViewBag.Organizations)
+                            {
+                                <option value="@organization.Id">@organization.Name - @organization.Date.ToShortDateString()</option>
+                            }
+                        </select>
+                        <span asp-validation-for="OrganizationId" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label asp-for="NumberOfDays" class="form-label">Gün Sayısı</label>
+                        <input asp-for="NumberOfDays" type="number" min="1" class="form-control" value="1" />
+                        <span asp-validation-for="NumberOfDays" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label asp-for="DailyRate" class="form-label">Günlük Ücret</label>
+                        <input asp-for="DailyRate" type="number" step="0.01" class="form-control" />
+                        <span asp-validation-for="DailyRate" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label asp-for="Status" class="form-label">Durum</label>
+                        <select asp-for="Status" class="form-select">
+                            <option value="0">Planlandı</option>
+                            <option value="1">Devam Ediyor</option>
+                            <option value="2">Tamamlandı</option>
+                            <option value="3">İptal Edildi</option>
+                        </select>
+                        <span asp-validation-for="Status" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input asp-for="IncludesMeal" class="form-check-input" />
+                            <label asp-for="IncludesMeal" class="form-check-label">Yemek Dahil</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input asp-for="IncludesAccommodation" class="form-check-input" />
+                            <label asp-for="IncludesAccommodation" class="form-check-label">Konaklama Dahil</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="MealCost" class="form-label">Yemek Maliyeti</label>
+                        <input asp-for="MealCost" type="number" step="0.01" class="form-control" />
+                        <span asp-validation-for="MealCost" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="AccommodationCost" class="form-label">Konaklama Maliyeti</label>
+                        <input asp-for="AccommodationCost" type="number" step="0.01" class="form-control" />
+                        <span asp-validation-for="AccommodationCost" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Notes" class="form-label">Notlar</label>
+                <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="Notes" class="text-danger"></span>
+            </div>
+
+            <div class="d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Kaydet
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+} 
