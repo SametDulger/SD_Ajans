@@ -50,6 +50,7 @@ SD_Ajans/
 - **Raporlama:** ClosedXML (Excel export)
 - **Dosya İşlemleri:** Custom FileService
 
+
 ## 📦 Kurulum
 
 ### Gereksinimler
