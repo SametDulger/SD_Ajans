@@ -1,144 +1,208 @@
-# SD Ajans — Promotör ve Manken Ajansı Yönetim Sistemi
+# SD Ajans - Manken ve Organizasyon Yönetim Sistemi
 
-SD Ajans, promotör ve manken ajanslarının operasyonel süreçlerini yönetmek için geliştirilmiş, modern ve çok katmanlı bir web uygulamasıdır. Manken, organizasyon, görevlendirme, ödeme ve muhasebe işlemlerini tek bir platformda birleştirir.
+## 📋 Proje Hakkında
+
+SD Ajans, manken ve organizasyon yönetimi için geliştirilmiş kapsamlı bir web uygulamasıdır. Bu sistem, manken kayıtları, organizasyon planlaması, görevlendirme yönetimi ve ödeme takibi gibi temel işlevleri sağlar.
+
+## 🏗️ Mimari Yapı
+
+Proje Clean Architecture prensiplerine uygun olarak geliştirilmiştir:
+
+- **SD_Ajans.Core**: Domain entities, interfaces ve business rules
+- **SD_Ajans.Data**: Data access layer, DbContext ve repositories
+- **SD_Ajans.Business**: Business logic ve services
+- **SD_Ajans.Web**: Presentation layer (MVC)
 
 ## 🚀 Özellikler
 
-### 📋 Temel Modüller
-- **Manken Yönetimi:** Kayıt, arama, profil güncelleme, fotoğraf yükleme, kategori ve uygunluk takibi
-- **Organizasyon Yönetimi:** Organizasyon oluşturma, planlama, tür ve durum takibi
-- **Görevlendirme:** Manken-organizasyon eşleştirme, otomatik ücret ve maliyet hesaplama
-- **Ödeme ve Muhasebe:** Kategoriye göre ücretlendirme, gelir-gider ve kar/zarar raporları, Excel çıktısı
+### Manken Yönetimi
+- Manken kayıt ve profil yönetimi
+- Fotoğraf yükleme ve yönetimi
+- Kategori bazlı sınıflandırma
+- Müsaitlik durumu takibi
+- Detaylı arama ve filtreleme
 
-### 🔐 Güvenlik ve Yetkilendirme
-- **Rol Tabanlı Yetkilendirme:** Sadece Admin rolü (güvenlik odaklı)
-- **Kimlik Doğrulama:** Güvenli giriş sistemi
-- **Yetkilendirme:** Tüm sayfalar için login zorunlu
+### Organizasyon Yönetimi
+- Organizasyon planlama ve kayıt
+- Bütçe yönetimi
+- Durum takibi (Planlandı, Devam Ediyor, Tamamlandı, İptal)
+- Farklı organizasyon tipleri
 
-### 🎨 Kullanıcı Arayüzü
-- **Modern Tasarım:** Bootstrap 5.3.2, responsive tasarım
-- **Kullanıcı Dostu:** Intuitive navigation ve modern UI/UX
-- **Mobil Uyumlu:** Tüm cihazlarda mükemmel görünüm
+### Görevlendirme Sistemi
+- Manken-organizasyon eşleştirme
+- Tarih ve saat yönetimi
+- Ücret hesaplama
+- Yemek ve konaklama maliyetleri
+- Çakışma kontrolü
 
-## 🏗️ Katmanlı Mimari
+### Ödeme Yönetimi
+- Ödeme kayıtları
+- Farklı ödeme tipleri (Nakit, Havale, Kredi Kartı)
+- Gelir-gider takibi
+- Raporlama
 
-```
-SD_Ajans/
-├── SD_Ajans.Core/          # Temel entity ve interface'ler
-│   ├── Entities/           # Veritabanı entity'leri
-│   └── Repositories/       # Repository interface'leri
-├── SD_Ajans.Data/          # Veri erişim katmanı
-│   ├── AppDbContext.cs     # Entity Framework context
-│   ├── Repositories/       # Repository implementasyonları
-│   └── SeedData.cs         # Başlangıç verileri
-├── SD_Ajans.Business/      # İş mantığı katmanı
-│   └── Services/           # İş servisleri
-└── SD_Ajans.Web/           # Web uygulaması
-    ├── Controllers/        # MVC controller'ları
-    ├── Views/              # Razor view'ları
-    ├── Models/             # View model'leri
-    ├── Services/           # Web servisleri
-    └── wwwroot/            # Statik dosyalar
-```
+### Güvenlik
+- ASP.NET Core Identity ile kullanıcı yönetimi
+- Role-based authorization
+- Session yönetimi
+- CSRF koruması
 
-## 🛠️ Teknoloji Stack
+## 🛠️ Teknolojiler
 
-- **Backend:** ASP.NET Core 9.0 MVC
-- **Veritabanı:** SQLite (Development)
-- **ORM:** Entity Framework Core
-- **Frontend:** Bootstrap 5.3.2, jQuery
-- **Raporlama:** ClosedXML (Excel export)
-- **Dosya İşlemleri:** Custom FileService
-
+- **Backend**: ASP.NET Core 9.0
+- **Database**: SQLite
+- **ORM**: Entity Framework Core
+- **Authentication**: ASP.NET Core Identity
+- **Logging**: Serilog
+- **Frontend**: Razor Pages, Bootstrap, jQuery
+- **File Upload**: Custom File Service
 
 ## 📦 Kurulum
 
 ### Gereksinimler
-
 - .NET 9.0 SDK
 - Visual Studio 2022 veya VS Code
-- Git
 
 ### Adımlar
 
-1. **Projeyi klonlayın:**
+1. **Repository'yi klonlayın**
    ```bash
-   git clone https://github.com/SametDulger/SD_Ajans.git
+   git clone https://github.com/your-username/SD_Ajans.git
    cd SD_Ajans
    ```
 
-2. **Bağımlılıkları yükleyin:**
+2. **Bağımlılıkları yükleyin**
    ```bash
    dotnet restore
    ```
 
-3. **Projeyi derleyin:**
+3. **Veritabanını oluşturun**
    ```bash
-   dotnet build
+   dotnet ef database update --project SD_Ajans.Data --startup-project SD_Ajans.Web
    ```
 
-4. **Veritabanı migrasyonlarını oluşturun:**
-   ```bash
-   dotnet ef migrations add InitialCreate -p SD_Ajans.Data -s SD_Ajans.Web
-   dotnet ef database update -p SD_Ajans.Data -s SD_Ajans.Web
-   ```
-
-5. **Projeyi başlatın:**
+4. **Uygulamayı çalıştırın**
    ```bash
    dotnet run --project SD_Ajans.Web
    ```
 
-6. **Tarayıcıda açın:**
+5. **Tarayıcıda açın**
    ```
    https://localhost:5001
    ```
 
-## 👤 Kullanıcı Girişi
+### Varsayılan Kullanıcı
+- **Email**: admin@sdajans.com
+- **Şifre**: Admin123!
 
-### Admin Kullanıcısı
-- **E-posta:** admin@sdajans.com
-- **Şifre:** Admin123!
-- **Yetkiler:** Tüm sistem işlemleri
+## 🔧 Konfigürasyon
 
-> **Not:** Sistem sadece Admin rolünü destekler. Kullanıcı kaydı bulunmamaktadır.
+### appsettings.json
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Data Source=SD_Ajans.db"
+  },
+  "FileUpload": {
+    "MaxFileSizeInMB": 5,
+    "AllowedExtensions": [".jpg", ".jpeg", ".png", ".gif", ".webp"]
+  },
+  "Security": {
+    "SessionTimeoutInMinutes": 480,
+    "MaxLoginAttempts": 5
+  }
+}
+```
 
-## 📊 Sistem Özellikleri
+## 📊 Veritabanı Şeması
 
-### Ana Sayfa
-- **Public Erişim:** Ajans tanıtım sayfası
-- **Dinamik İstatistikler:** Model, organizasyon ve görevlendirme sayıları
-- **Modern Tasarım:** Hero section, hizmetler, iletişim bilgileri
+### Ana Tablolar
+- **Users**: Kullanıcı bilgileri
+- **Mankens**: Manken profilleri
+- **Organizations**: Organizasyon bilgileri
+- **Assignments**: Görevlendirmeler
+- **Payments**: Ödeme kayıtları
 
-### Manken Yönetimi
-- **Fotoğraf Yükleme:** Otomatik klasör oluşturma ve güvenli dosya adlandırma
-- **Detaylı Arama:** İsim, kategori ve uygunluk bazlı filtreleme
-- **Profil Yönetimi:** Kapsamlı bilgi güncelleme
+### İlişkiler
+- Manken ↔ Assignment (1:N)
+- Organization ↔ Assignment (1:N)
+- Organization ↔ Payment (1:N)
+- User ↔ Organization (1:N) [CreatedBy]
+- User ↔ Payment (1:N) [ProcessedBy]
 
-### Muhasebe ve Raporlama
-- **Ücret Hesaplama:** Kategori bazlı otomatik hesaplama
-- **Excel Raporları:** Detaylı finansal raporlar
-- **Gelir-Gider Takibi:** Kapsamlı mali analiz
+## 🔒 Güvenlik Özellikleri
 
-## 🔧 Geliştirme
+- **Authentication**: JWT token tabanlı
+- **Authorization**: Role-based access control
+- **Input Validation**: Server-side validation
+- **File Upload Security**: Dosya tipi ve boyut kontrolü
+- **SQL Injection Protection**: Entity Framework ile parametrized queries
+- **XSS Protection**: HTML encoding
+- **CSRF Protection**: Anti-forgery tokens
 
-### Proje Yapısı
-- **Clean Architecture:** Katmanlı mimari prensipleri
-- **Repository Pattern:** Veri erişim soyutlaması
-- **Service Layer:** İş mantığı ayrımı
-- **Dependency Injection:** Loose coupling
+## 📝 Logging
 
-### Kod Standartları
-- **C# 12:** Modern C# özellikleri
-- **Async/Await:** Asenkron programlama
-- **Nullable Reference Types:** Tip güvenliği
-- **LINQ:** Veri sorgulama
+Serilog kullanılarak yapılandırılmış logging sistemi:
+- Console logging
+- File logging (günlük rotasyon)
+- Structured logging
+- Error tracking
 
+## 🧪 Test
 
-## 🤝 Katkı
+```bash
+# Unit testleri çalıştır
+dotnet test
+
+# Coverage raporu
+dotnet test --collect:"XPlat Code Coverage"
+```
+
+## 📈 Performans
+
+- **Caching**: Memory cache kullanımı
+- **Database Indexing**: Optimized indexes
+- **Lazy Loading**: Navigation properties
+- **Async/Await**: Asynchronous operations
+
+## 🚀 Deployment
+
+### Production
+```bash
+dotnet publish -c Release -o ./publish
+```
+
+### Docker
+```dockerfile
+FROM mcr.microsoft.com/dotnet/aspnet:9.0
+COPY ./publish /app
+WORKDIR /app
+EXPOSE 80
+ENTRYPOINT ["dotnet", "SD_Ajans.Web.dll"]
+```
+
+## 🤝 Katkıda Bulunma
 
 1. Fork yapın
-2. Feature branch oluşturun (`git checkout -b feature/AmazingFeature`)
-3. Değişikliklerinizi commit edin (`git commit -m 'Add some AmazingFeature'`)
-4. Branch'inizi push edin (`git push origin feature/AmazingFeature`)
+2. Feature branch oluşturun (`git checkout -b feature/amazing-feature`)
+3. Commit yapın (`git commit -m 'Add amazing feature'`)
+4. Push yapın (`git push origin feature/amazing-feature`)
 5. Pull Request oluşturun
+
+## 📄 Lisans
+
+Bu proje MIT lisansı altında lisanslanmıştır. Detaylar için [LICENSE](LICENSE) dosyasına bakın.
+
+## 🔄 Changelog
+
+### v1.0.0 (2024-01-XX)
+- İlk sürüm
+- Temel CRUD işlemleri
+- Manken ve organizasyon yönetimi
+- Ödeme sistemi
+- Güvenlik özellikleri
+
+---
+
+**Not**: Bu proje geliştirme aşamasındadır. Production kullanımı için ek güvenlik ve performans optimizasyonları gerekebilir.
 

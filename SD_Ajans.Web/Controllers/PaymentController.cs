@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using SD_Ajans.Business.Services;
 using SD_Ajans.Core.Entities;
 using SD_Ajans.Data;
@@ -11,73 +12,92 @@ namespace SD_Ajans.Web.Controllers
     public class PaymentController : Controller
     {
         private readonly IPaymentService _paymentService;
-        private readonly IOrganizationService _organizationService;
         private readonly IAssignmentService _assignmentService;
+        private readonly ILogger<PaymentController> _logger;
         private readonly AppDbContext _context;
 
-        public PaymentController(IPaymentService paymentService, IOrganizationService organizationService, IAssignmentService assignmentService, AppDbContext context)
+        public PaymentController(
+            IPaymentService paymentService, 
+            IAssignmentService assignmentService,
+            ILogger<PaymentController> logger,
+            AppDbContext context)
         {
             _paymentService = paymentService;
-            _organizationService = organizationService;
             _assignmentService = assignmentService;
+            _logger = logger;
             _context = context;
         }
 
         public async Task<IActionResult> Index()
         {
-            var payments = await _context.Payments
-                .Include(p => p.Assignment)
-                .ThenInclude(a => a!.Manken)
-                .Include(p => p.Assignment)
-                .ThenInclude(a => a!.Organization)
-                .Where(p => p.IsActive)
-                .OrderByDescending(p => p.CreatedAt)
-                .ToListAsync();
-            return View(payments);
+            try
+            {
+                var payments = await _paymentService.GetAllPaymentsAsync();
+                return View(payments);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ödeme listesi alınırken hata oluştu");
+                TempData["Error"] = "Ödeme listesi alınırken bir hata oluştu.";
+                return View(new List<Payment>());
+            }
         }
 
         public async Task<IActionResult> Details(int id)
         {
-            var payment = await _context.Payments
-                .Include(p => p.Assignment)
-                .ThenInclude(a => a!.Manken)
-                .Include(p => p.Assignment)
-                .ThenInclude(a => a!.Organization)
-                .FirstOrDefaultAsync(p => p.Id == id && p.IsActive);
-            
-            if (payment == null)
+            try
             {
-                return NotFound();
+                var payment = await _paymentService.GetPaymentByIdAsync(id);
+                if (payment == null)
+                {
+                    TempData["Error"] = "Ödeme bulunamadı.";
+                    return RedirectToAction(nameof(Index));
+                }
+                return View(payment);
             }
-            return View(payment);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ödeme detay sayfası açılırken hata oluştu. Id: {Id}", id);
+                TempData["Error"] = "Ödeme bilgileri alınırken hata oluştu.";
+                return RedirectToAction(nameof(Index));
+            }
         }
 
         public async Task<IActionResult> Create()
         {
-            ViewBag.Assignments = await _assignmentService.GetAllAssignmentsAsync();
-            return View();
+            try
+            {
+                ViewBag.Assignments = await _assignmentService.GetAllAssignmentsAsync();
+                return View();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ödeme oluşturma sayfası açılırken hata oluştu");
+                TempData["Error"] = "Sayfa yüklenirken hata oluştu.";
+                return RedirectToAction(nameof(Index));
+            }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Payment payment)
         {
-            if (ModelState.IsValid)
+            try
             {
-                // Geçici olarak ilk User'ı kullan veya oluştur
-                var user = await _context.Users.FirstOrDefaultAsync();
-                if (user == null)
+                if (!ModelState.IsValid)
                 {
-                    user = new User
-                    {
-                        UserName = "admin@sdajans.com",
-                        Email = "admin@sdajans.com",
-                        FirstName = "Admin",
-                        LastName = "User",
-                        Role = UserRole.Admin
-                    };
-                    _context.Users.Add(user);
-                    await _context.SaveChangesAsync();
+                    var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                    TempData["Error"] = $"Validation hataları: {string.Join(", ", errors)}";
+                    ViewBag.Assignments = await _assignmentService.GetAllAssignmentsAsync();
+                    return View(payment);
+                }
+
+                // Mevcut kullanıcıyı al
+                var currentUser = await _context.Users.FirstOrDefaultAsync();
+                if (currentUser != null)
+                {
+                    payment.CreatedById = currentUser.Id;
+                    payment.ProcessedById = currentUser.Id;
                 }
 
                 // OrganizationId'yi seçilen Assignment üzerinden otomatik doldur
@@ -90,8 +110,6 @@ namespace SD_Ajans.Web.Controllers
                     }
                 }
 
-                payment.CreatedById = user.Id;
-                payment.ProcessedById = user.Id;
                 payment.CreatedAt = DateTime.Now;
                 payment.IsActive = true;
 
@@ -99,111 +117,133 @@ namespace SD_Ajans.Web.Controllers
                 TempData["Success"] = "Ödeme başarıyla eklendi.";
                 return RedirectToAction(nameof(Index));
             }
-
-            var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
-            var errorMessage = string.Join(", ", errors);
-            TempData["Error"] = $"Ödeme eklenirken bir hata oluştu: {errorMessage}";
-            ViewBag.Assignments = await _assignmentService.GetAllAssignmentsAsync();
-            return View(payment);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ödeme oluşturma sırasında hata oluştu");
+                TempData["Error"] = "Ödeme eklenirken beklenmeyen bir hata oluştu.";
+                ViewBag.Assignments = await _assignmentService.GetAllAssignmentsAsync();
+                return View(payment);
+            }
         }
 
         public async Task<IActionResult> Edit(int id)
         {
-            var payment = await _context.Payments
-                .Include(p => p.Assignment)
-                .ThenInclude(a => a!.Manken)
-                .Include(p => p.Assignment)
-                .ThenInclude(a => a!.Organization)
-                .FirstOrDefaultAsync(p => p.Id == id && p.IsActive);
-
-            if (payment == null)
+            try
             {
-                return NotFound();
+                var payment = await _paymentService.GetPaymentByIdAsync(id);
+                if (payment == null)
+                {
+                    TempData["Error"] = "Ödeme bulunamadı.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                ViewBag.Assignments = await _assignmentService.GetAllAssignmentsAsync();
+                return View(payment);
             }
-            ViewBag.Assignments = await _assignmentService.GetAllAssignmentsAsync();
-            return View(payment);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ödeme düzenleme sayfası açılırken hata oluştu. Id: {Id}", id);
+                TempData["Error"] = "Ödeme bilgileri alınırken hata oluştu.";
+                return RedirectToAction(nameof(Index));
+            }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Payment payment)
         {
-            if (id != payment.Id)
+            try
             {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                var existingPayment = await _paymentService.GetPaymentByIdAsync(id);
-                if (existingPayment != null)
+                if (id != payment.Id)
                 {
-                    payment.CreatedById = existingPayment.CreatedById;
-                    payment.CreatedAt = existingPayment.CreatedAt;
+                    TempData["Error"] = "Geçersiz ödeme ID'si.";
+                    return RedirectToAction(nameof(Index));
                 }
 
-                // OrganizationId'yi seçilen Assignment üzerinden otomatik doldur
-                if (payment.AssignmentId.HasValue)
+                if (!ModelState.IsValid)
                 {
-                    var assignment = await _assignmentService.GetAssignmentByIdAsync(payment.AssignmentId.Value);
-                    if (assignment != null)
-                    {
-                        payment.OrganizationId = assignment.OrganizationId;
-                    }
+                    var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                    TempData["Error"] = $"Validation hataları: {string.Join(", ", errors)}";
+                    ViewBag.Assignments = await _assignmentService.GetAllAssignmentsAsync();
+                    return View(payment);
                 }
 
                 await _paymentService.UpdatePaymentAsync(payment);
                 TempData["Success"] = "Ödeme başarıyla güncellendi.";
                 return RedirectToAction(nameof(Index));
             }
-
-            var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
-            var errorMessage = string.Join(", ", errors);
-            TempData["Error"] = $"Ödeme güncellenirken bir hata oluştu: {errorMessage}";
-            ViewBag.Assignments = await _assignmentService.GetAllAssignmentsAsync();
-            return View(payment);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ödeme güncelleme sırasında hata oluştu. Id: {Id}", id);
+                TempData["Error"] = "Ödeme güncellenirken beklenmeyen bir hata oluştu.";
+                ViewBag.Assignments = await _assignmentService.GetAllAssignmentsAsync();
+                return View(payment);
+            }
         }
 
         public async Task<IActionResult> Delete(int id)
         {
-            var payment = await _context.Payments
-                .Include(p => p.Assignment)
-                .ThenInclude(a => a!.Manken)
-                .Include(p => p.Assignment)
-                .ThenInclude(a => a!.Organization)
-                .FirstOrDefaultAsync(p => p.Id == id && p.IsActive);
-            
-            if (payment == null)
+            try
             {
-                return NotFound();
+                var payment = await _paymentService.GetPaymentByIdAsync(id);
+                if (payment == null)
+                {
+                    TempData["Error"] = "Ödeme bulunamadı.";
+                    return RedirectToAction(nameof(Index));
+                }
+                return View(payment);
             }
-            return View(payment);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ödeme silme sayfası açılırken hata oluştu. Id: {Id}", id);
+                TempData["Error"] = "Ödeme bilgileri alınırken hata oluştu.";
+                return RedirectToAction(nameof(Index));
+            }
         }
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            await _paymentService.DeletePaymentAsync(id);
-            return RedirectToAction(nameof(Index));
+            try
+            {
+                await _paymentService.DeletePaymentAsync(id);
+                TempData["Success"] = "Ödeme başarıyla silindi.";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ödeme silme sırasında hata oluştu. Id: {Id}", id);
+                TempData["Error"] = "Ödeme silinirken beklenmeyen bir hata oluştu.";
+                return RedirectToAction(nameof(Index));
+            }
         }
 
         public async Task<IActionResult> Reports()
         {
-            var startDate = DateTime.Now.AddMonths(-1);
-            var endDate = DateTime.Now;
+            try
+            {
+                var startDate = DateTime.Now.AddMonths(-1);
+                var endDate = DateTime.Now;
 
-            var totalIncome = await _paymentService.CalculateTotalIncomeAsync(startDate, endDate);
-            var totalExpense = await _paymentService.CalculateTotalExpenseAsync(startDate, endDate);
-            var netProfit = await _paymentService.CalculateNetProfitAsync(startDate, endDate);
+                var totalIncome = await _paymentService.CalculateTotalIncomeAsync(startDate, endDate);
+                var totalExpense = await _paymentService.CalculateTotalExpenseAsync(startDate, endDate);
+                var netProfit = await _paymentService.CalculateNetProfitAsync(startDate, endDate);
 
-            ViewBag.TotalIncome = totalIncome;
-            ViewBag.TotalExpense = totalExpense;
-            ViewBag.NetProfit = netProfit;
-            ViewBag.StartDate = startDate;
-            ViewBag.EndDate = endDate;
+                ViewBag.TotalIncome = totalIncome;
+                ViewBag.TotalExpense = totalExpense;
+                ViewBag.NetProfit = netProfit;
+                ViewBag.StartDate = startDate;
+                ViewBag.EndDate = endDate;
 
-            return View();
+                return View();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ödeme raporları sayfası açılırken hata oluştu");
+                TempData["Error"] = "Raporlar yüklenirken hata oluştu.";
+                return RedirectToAction(nameof(Index));
+            }
         }
     }
 } 

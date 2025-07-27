@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using SD_Ajans.Business.Services;
 using SD_Ajans.Core.Entities;
 using SD_Ajans.Core.Repositories;
@@ -13,19 +14,36 @@ namespace SD_Ajans.Web.Controllers
     public class MankenController : Controller
     {
         private readonly IMankenService _mankenService;
+        private readonly IFileService _fileService;
+        private readonly ILogger<MankenController> _logger;
         private readonly AppDbContext _context;
 
-        public MankenController(IMankenService mankenService, AppDbContext context)
+        public MankenController(
+            IMankenService mankenService, 
+            IFileService fileService,
+            ILogger<MankenController> logger,
+            AppDbContext context)
         {
             _mankenService = mankenService;
+            _fileService = fileService;
+            _logger = logger;
             _context = context;
         }
 
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Index()
         {
-            var mankens = await _context.Mankens.Where(m => m.IsActive).ToListAsync();
-            return View(mankens);
+            try
+            {
+                var mankens = await _mankenService.GetAllMankensAsync();
+                return View(mankens);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Manken listesi alınırken hata oluştu");
+                TempData["Error"] = "Manken listesi alınırken bir hata oluştu.";
+                return View(new List<Manken>());
+            }
         }
 
         [Authorize(Roles = "Admin")]
@@ -39,88 +57,76 @@ namespace SD_Ajans.Web.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create(Manken manken, IFormFile? photo)
         {
-            if (ModelState.IsValid)
+            try
             {
-                // Geçici olarak ilk User'ı kullan veya oluştur
-                var user = await _context.Users.FirstOrDefaultAsync();
-                if (user == null)
+                if (!ModelState.IsValid)
                 {
-                    user = new User
-                    {
-                        UserName = "admin@sdajans.com",
-                        Email = "admin@sdajans.com",
-                        FirstName = "Admin",
-                        LastName = "User",
-                        Role = UserRole.Admin
-                    };
-                    _context.Users.Add(user);
-                    await _context.SaveChangesAsync();
+                    var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                    TempData["Error"] = $"Validation hataları: {string.Join(", ", errors)}";
+                    return View(manken);
                 }
-                
-                manken.UserId = user.Id;
-                manken.CreatedAt = DateTime.Now;
-                manken.IsActive = true;
-                
+
+                // Fotoğraf validasyonu
+                if (photo != null && !_fileService.IsValidFile(photo))
+                {
+                    TempData["Error"] = $"Geçersiz dosya. Maksimum boyut: {_fileService.GetFileSizeInMB(5 * 1024 * 1024)}MB, İzin verilen formatlar: JPG, PNG, GIF, WEBP";
+                    return View(manken);
+                }
+
                 // Fotoğraf yükleme işlemi
                 if (photo != null && photo.Length > 0)
                 {
                     try
                     {
-                        var fileService = HttpContext.RequestServices.GetRequiredService<IFileService>();
-                        
-                        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
-                        var fileExtension = Path.GetExtension(photo.FileName).ToLowerInvariant();
-                        
-                        if (!allowedExtensions.Contains(fileExtension))
-                        {
-                            TempData["Warning"] = "Fotoğraf formatı desteklenmiyor. Sadece JPG, PNG ve GIF formatları kabul edilir.";
-                        }
-                        else if (photo.Length > 5 * 1024 * 1024) // 5MB limit
-                        {
-                            TempData["Warning"] = "Fotoğraf boyutu 5MB'dan büyük olamaz.";
-                        }
-                        else
-                        {
-                            var filePath = await fileService.UploadFileAsync(photo, "manken-photos");
-                            
-                            // Fotoğraf yolunu kaydet
-                            manken.PhotoPath = "/" + filePath;
-                            
-                            TempData["Success"] = "Manken ve fotoğraf başarıyla eklendi.";
-                        }
+                        var filePath = await _fileService.UploadFileAsync(photo, "manken-photos");
+                        manken.PhotoPath = "/" + filePath;
+                        _logger.LogInformation("Manken fotoğrafı yüklendi: {FilePath}", filePath);
                     }
                     catch (Exception ex)
                     {
-                        TempData["Warning"] = $"Manken eklendi ancak fotoğraf yüklenirken hata oluştu: {ex.Message}";
+                        _logger.LogError(ex, "Fotoğraf yükleme sırasında hata oluştu");
+                        TempData["Error"] = $"Fotoğraf yüklenirken hata oluştu: {ex.Message}";
+                        return View(manken);
                     }
                 }
-                else
-                {
-                    TempData["Success"] = "Manken başarıyla eklendi.";
-                }
-                
+
                 await _mankenService.CreateMankenAsync(manken);
+                TempData["Success"] = "Manken başarıyla eklendi.";
                 
                 return RedirectToAction(nameof(Index));
             }
-            
-            // ModelState hatalarını detaylı olarak logla
-            var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
-            var errorMessage = string.Join(", ", errors);
-            TempData["Error"] = $"Manken eklenirken bir hata oluştu: {errorMessage}";
-            
-            return View(manken);
+            catch (InvalidOperationException ex)
+            {
+                TempData["Error"] = ex.Message;
+                return View(manken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Manken oluşturma sırasında hata oluştu");
+                TempData["Error"] = "Manken eklenirken beklenmeyen bir hata oluştu.";
+                return View(manken);
+            }
         }
 
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int id)
         {
-            var manken = await _mankenService.GetMankenByIdAsync(id);
-            if (manken == null)
+            try
             {
-                return NotFound();
+                var manken = await _mankenService.GetMankenByIdAsync(id);
+                if (manken == null)
+                {
+                    TempData["Error"] = "Manken bulunamadı.";
+                    return RedirectToAction(nameof(Index));
+                }
+                return View(manken);
             }
-            return View(manken);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Manken düzenleme sayfası açılırken hata oluştu. Id: {Id}", id);
+                TempData["Error"] = "Manken bilgileri alınırken hata oluştu.";
+                return RedirectToAction(nameof(Index));
+            }
         }
 
         [HttpPost]
@@ -128,89 +134,100 @@ namespace SD_Ajans.Web.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int id, Manken manken, IFormFile? photo)
         {
-            if (id != manken.Id)
+            try
             {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                var existingManken = await _mankenService.GetMankenByIdAsync(id);
-                if (existingManken != null)
+                if (id != manken.Id)
                 {
-                    manken.UserId = existingManken.UserId;
-                    manken.CreatedAt = existingManken.CreatedAt;
-                    manken.CreatedById = existingManken.CreatedById;
-                    manken.PhotoPath = existingManken.PhotoPath; // Mevcut fotoğraf yolunu koru
+                    TempData["Error"] = "Geçersiz manken ID'si.";
+                    return RedirectToAction(nameof(Index));
                 }
-                
+
+                if (!ModelState.IsValid)
+                {
+                    var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                    TempData["Error"] = $"Validation hataları: {string.Join(", ", errors)}";
+                    return View(manken);
+                }
+
+                var existingManken = await _mankenService.GetMankenByIdAsync(id);
+                if (existingManken == null)
+                {
+                    TempData["Error"] = "Manken bulunamadı.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                // Fotoğraf validasyonu
+                if (photo != null && !_fileService.IsValidFile(photo))
+                {
+                    TempData["Error"] = $"Geçersiz dosya. Maksimum boyut: {_fileService.GetFileSizeInMB(5 * 1024 * 1024)}MB, İzin verilen formatlar: JPG, PNG, GIF, WEBP";
+                    return View(manken);
+                }
+
                 // Yeni fotoğraf yükleme işlemi
                 if (photo != null && photo.Length > 0)
                 {
                     try
                     {
-                        var fileService = HttpContext.RequestServices.GetRequiredService<IFileService>();
-                        
-                        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
-                        var fileExtension = Path.GetExtension(photo.FileName).ToLowerInvariant();
-                        
-                        if (!allowedExtensions.Contains(fileExtension))
+                        // Eski fotoğrafı sil
+                        if (!string.IsNullOrEmpty(existingManken.PhotoPath))
                         {
-                            TempData["Warning"] = "Fotoğraf formatı desteklenmiyor. Sadece JPG, PNG ve GIF formatları kabul edilir.";
+                            _fileService.DeleteFile(existingManken.PhotoPath.TrimStart('/'));
                         }
-                        else if (photo.Length > 5 * 1024 * 1024) // 5MB limit
-                        {
-                            TempData["Warning"] = "Fotoğraf boyutu 5MB'dan büyük olamaz.";
-                        }
-                        else
-                        {
-                            // Eski fotoğrafı sil
-                            if (!string.IsNullOrEmpty(existingManken?.PhotoPath))
-                            {
-                                fileService.DeleteFile(existingManken.PhotoPath);
-                            }
-                            
-                            var filePath = await fileService.UploadFileAsync(photo, "manken-photos");
-                            manken.PhotoPath = "/" + filePath;
-                            
-                            TempData["Success"] = "Manken ve fotoğraf başarıyla güncellendi.";
-                        }
+
+                        var filePath = await _fileService.UploadFileAsync(photo, "manken-photos");
+                        manken.PhotoPath = "/" + filePath;
+                        _logger.LogInformation("Manken fotoğrafı güncellendi: {FilePath}", filePath);
                     }
                     catch (Exception ex)
                     {
-                        TempData["Warning"] = $"Manken güncellendi ancak fotoğraf yüklenirken hata oluştu: {ex.Message}";
+                        _logger.LogError(ex, "Fotoğraf güncelleme sırasında hata oluştu");
+                        TempData["Error"] = $"Fotoğraf güncellenirken hata oluştu: {ex.Message}";
+                        return View(manken);
                     }
                 }
                 else
                 {
                     // Yeni fotoğraf yüklenmediyse mevcut fotoğraf yolunu koru
-                    if (existingManken != null)
-                    {
-                        manken.PhotoPath = existingManken.PhotoPath;
-                    }
-                    TempData["Success"] = "Manken başarıyla güncellendi.";
+                    manken.PhotoPath = existingManken.PhotoPath;
                 }
-                
+
                 await _mankenService.UpdateMankenAsync(manken);
+                TempData["Success"] = "Manken başarıyla güncellendi.";
+                
                 return RedirectToAction(nameof(Index));
             }
-            
-            // ModelState hatalarını detaylı olarak logla
-            var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
-            var errorMessage = string.Join(", ", errors);
-            TempData["Error"] = $"Manken güncellenirken bir hata oluştu: {errorMessage}";
-            return View(manken);
+            catch (InvalidOperationException ex)
+            {
+                TempData["Error"] = ex.Message;
+                return View(manken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Manken güncelleme sırasında hata oluştu. Id: {Id}", id);
+                TempData["Error"] = "Manken güncellenirken beklenmeyen bir hata oluştu.";
+                return View(manken);
+            }
         }
 
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
-            var manken = await _mankenService.GetMankenByIdAsync(id);
-            if (manken == null)
+            try
             {
-                return NotFound();
+                var manken = await _mankenService.GetMankenByIdAsync(id);
+                if (manken == null)
+                {
+                    TempData["Error"] = "Manken bulunamadı.";
+                    return RedirectToAction(nameof(Index));
+                }
+                return View(manken);
             }
-            return View(manken);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Manken silme sayfası açılırken hata oluştu. Id: {Id}", id);
+                TempData["Error"] = "Manken bilgileri alınırken hata oluştu.";
+                return RedirectToAction(nameof(Index));
+            }
         }
 
         [HttpPost, ActionName("Delete")]
@@ -220,13 +237,26 @@ namespace SD_Ajans.Web.Controllers
         {
             try
             {
+                var manken = await _mankenService.GetMankenByIdAsync(id);
+                if (manken != null && !string.IsNullOrEmpty(manken.PhotoPath))
+                {
+                    // Fotoğrafı sil
+                    _fileService.DeleteFile(manken.PhotoPath.TrimStart('/'));
+                }
+
                 await _mankenService.DeleteMankenAsync(id);
                 TempData["Success"] = "Manken başarıyla silindi.";
                 return RedirectToAction(nameof(Index));
             }
+            catch (InvalidOperationException ex)
+            {
+                TempData["Error"] = ex.Message;
+                return RedirectToAction(nameof(Index));
+            }
             catch (Exception ex)
             {
-                TempData["Error"] = $"Manken silinirken hata oluştu: {ex.Message}";
+                _logger.LogError(ex, "Manken silme sırasında hata oluştu. Id: {Id}", id);
+                TempData["Error"] = "Manken silinirken beklenmeyen bir hata oluştu.";
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -234,67 +264,66 @@ namespace SD_Ajans.Web.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Details(int id)
         {
-            var manken = await _context.Mankens.FirstOrDefaultAsync(m => m.Id == id);
-                
-            if (manken == null)
+            try
             {
-                return NotFound();
+                var manken = await _mankenService.GetMankenByIdAsync(id);
+                if (manken == null)
+                {
+                    TempData["Error"] = "Manken bulunamadı.";
+                    return RedirectToAction(nameof(Index));
+                }
+                return View(manken);
             }
-            return View(manken);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Manken detay sayfası açılırken hata oluştu. Id: {Id}", id);
+                TempData["Error"] = "Manken bilgileri alınırken hata oluştu.";
+                return RedirectToAction(nameof(Index));
+            }
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAllMankens()
         {
-            var mankens = await _mankenService.GetAllMankensAsync();
-            return Json(mankens.Select(m => new { m.Id, m.FirstName, m.LastName, m.Category }));
+            try
+            {
+                var mankens = await _mankenService.GetAllMankensAsync();
+                return Json(mankens.Select(m => new { m.Id, m.FirstName, m.LastName, m.Category }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetAllMankens API'si çalışırken hata oluştu");
+                return Json(new List<object>());
+            }
         }
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Search(string searchTerm, string gender, string category, int? minHeight, int? maxHeight)
         {
-            Gender? genderEnum = null;
-            if (!string.IsNullOrEmpty(gender) && Enum.TryParse<Gender>(gender, out var g))
+            try
             {
-                genderEnum = g;
-            }
+                Gender? genderEnum = null;
+                if (!string.IsNullOrEmpty(gender) && Enum.TryParse<Gender>(gender, out var g))
+                {
+                    genderEnum = g;
+                }
 
-            MankenCategory? categoryEnum = null;
-            if (!string.IsNullOrEmpty(category) && Enum.TryParse<MankenCategory>(category, out var c))
+                MankenCategory? categoryEnum = null;
+                if (!string.IsNullOrEmpty(category) && Enum.TryParse<MankenCategory>(category, out var c))
+                {
+                    categoryEnum = c;
+                }
+
+                var mankens = await _mankenService.SearchMankensAsync(searchTerm, genderEnum, categoryEnum, minHeight, maxHeight);
+                return View("Index", mankens);
+            }
+            catch (Exception ex)
             {
-                categoryEnum = c;
+                _logger.LogError(ex, "Manken arama sırasında hata oluştu");
+                TempData["Error"] = "Arama sırasında hata oluştu.";
+                return RedirectToAction(nameof(Index));
             }
-
-            var query = _context.Mankens.AsQueryable();
-
-            if (!string.IsNullOrEmpty(searchTerm))
-            {
-                query = query.Where(m => m.FirstName.Contains(searchTerm) || m.LastName.Contains(searchTerm) || m.Email.Contains(searchTerm));
-            }
-
-            if (genderEnum.HasValue)
-            {
-                query = query.Where(m => m.Gender == genderEnum.Value);
-            }
-
-            if (categoryEnum.HasValue)
-            {
-                query = query.Where(m => m.Category == categoryEnum.Value);
-            }
-
-            if (minHeight.HasValue)
-            {
-                query = query.Where(m => m.Height >= minHeight.Value);
-            }
-
-            if (maxHeight.HasValue)
-            {
-                query = query.Where(m => m.Height <= maxHeight.Value);
-            }
-
-            var mankens = await query.ToListAsync();
-            return View("Index", mankens);
         }
     }
 } 

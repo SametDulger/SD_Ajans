@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using SD_Ajans.Business.Services;
 using SD_Ajans.Core.Entities;
 using SD_Ajans.Data;
 
@@ -9,18 +11,31 @@ namespace SD_Ajans.Web.Controllers
     [Authorize]
     public class OrganizationController : Controller
     {
+        private readonly IOrganizationService _organizationService;
+        private readonly ILogger<OrganizationController> _logger;
         private readonly AppDbContext _context;
 
-        public OrganizationController(AppDbContext context)
+        public OrganizationController(IOrganizationService organizationService, ILogger<OrganizationController> logger, AppDbContext context)
         {
+            _organizationService = organizationService;
+            _logger = logger;
             _context = context;
         }
 
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Index()
         {
-            var organizations = await _context.Organizations.ToListAsync();
-            return View(organizations);
+            try
+            {
+                var organizations = await _organizationService.GetAllOrganizationsAsync();
+                return View(organizations);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Organizasyon listesi alınırken hata oluştu");
+                TempData["Error"] = "Organizasyon listesi alınırken bir hata oluştu.";
+                return View(new List<Organization>());
+            }
         }
 
         [Authorize(Roles = "Admin")]
@@ -34,43 +49,56 @@ namespace SD_Ajans.Web.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create(Organization organization)
         {
-            if (ModelState.IsValid)
+            try
             {
-                // Geçici olarak ilk User'ı kullan veya oluştur
-                var user = await _context.Users.FirstOrDefaultAsync();
-                if (user == null)
+                if (!ModelState.IsValid)
                 {
-                    user = new User
-                    {
-                        UserName = "admin@sdajans.com",
-                        Email = "admin@sdajans.com",
-                        FirstName = "Admin",
-                        LastName = "User",
-                        Role = UserRole.Admin
-                    };
-                    _context.Users.Add(user);
-                    await _context.SaveChangesAsync();
+                    var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                    TempData["Error"] = $"Validation hataları: {string.Join(", ", errors)}";
+                    return View(organization);
                 }
-                
-                organization.CreatedById = user.Id;
+
+                // Mevcut kullanıcıyı al
+                var currentUser = await _context.Users.FirstOrDefaultAsync();
+                if (currentUser != null)
+                {
+                    organization.CreatedById = currentUser.Id;
+                }
+
                 organization.CreatedAt = DateTime.Now;
-                
-                _context.Add(organization);
-                await _context.SaveChangesAsync();
+                organization.IsActive = true;
+
+                await _organizationService.CreateOrganizationAsync(organization);
+                TempData["Success"] = "Organizasyon başarıyla eklendi.";
                 return RedirectToAction(nameof(Index));
             }
-            return View(organization);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Organizasyon oluşturma sırasında hata oluştu");
+                TempData["Error"] = "Organizasyon eklenirken beklenmeyen bir hata oluştu.";
+                return View(organization);
+            }
         }
 
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int id)
         {
-            var organization = await _context.Organizations.FindAsync(id);
-            if (organization == null)
+            try
             {
-                return NotFound();
+                var organization = await _organizationService.GetOrganizationByIdAsync(id);
+                if (organization == null)
+                {
+                    TempData["Error"] = "Organizasyon bulunamadı.";
+                    return RedirectToAction(nameof(Index));
+                }
+                return View(organization);
             }
-            return View(organization);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Organizasyon düzenleme sayfası açılırken hata oluştu. Id: {Id}", id);
+                TempData["Error"] = "Organizasyon bilgileri alınırken hata oluştu.";
+                return RedirectToAction(nameof(Index));
+            }
         }
 
         [HttpPost]
@@ -78,45 +106,52 @@ namespace SD_Ajans.Web.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int id, Organization organization)
         {
-            if (id != organization.Id)
+            try
             {
-                return NotFound();
-            }
+                if (id != organization.Id)
+                {
+                    TempData["Error"] = "Geçersiz organizasyon ID'si.";
+                    return RedirectToAction(nameof(Index));
+                }
 
-            if (ModelState.IsValid)
-            {
-                try
+                if (!ModelState.IsValid)
                 {
-                    _context.Update(organization);
-                    await _context.SaveChangesAsync();
+                    var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                    TempData["Error"] = $"Validation hataları: {string.Join(", ", errors)}";
+                    return View(organization);
                 }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!OrganizationExists(organization.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+
+                await _organizationService.UpdateOrganizationAsync(organization);
+                TempData["Success"] = "Organizasyon başarıyla güncellendi.";
                 return RedirectToAction(nameof(Index));
             }
-            return View(organization);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Organizasyon güncelleme sırasında hata oluştu. Id: {Id}", id);
+                TempData["Error"] = "Organizasyon güncellenirken beklenmeyen bir hata oluştu.";
+                return View(organization);
+            }
         }
 
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
-            var organization = await _context.Organizations
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (organization == null)
+            try
             {
-                return NotFound();
+                var organization = await _organizationService.GetOrganizationByIdAsync(id);
+                if (organization == null)
+                {
+                    TempData["Error"] = "Organizasyon bulunamadı.";
+                    return RedirectToAction(nameof(Index));
+                }
+                return View(organization);
             }
-
-            return View(organization);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Organizasyon silme sayfası açılırken hata oluştu. Id: {Id}", id);
+                TempData["Error"] = "Organizasyon bilgileri alınırken hata oluştu.";
+                return RedirectToAction(nameof(Index));
+            }
         }
 
         [HttpPost, ActionName("Delete")]
@@ -124,45 +159,76 @@ namespace SD_Ajans.Web.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var organization = await _context.Organizations.FindAsync(id);
-            if (organization != null)
+            try
             {
-                _context.Organizations.Remove(organization);
+                await _organizationService.DeleteOrganizationAsync(id);
+                TempData["Success"] = "Organizasyon başarıyla silindi.";
+                return RedirectToAction(nameof(Index));
             }
-            
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Organizasyon silme sırasında hata oluştu. Id: {Id}", id);
+                TempData["Error"] = "Organizasyon silinirken beklenmeyen bir hata oluştu.";
+                return RedirectToAction(nameof(Index));
+            }
         }
 
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Details(int id)
         {
-            var organization = await _context.Organizations
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (organization == null)
+            try
             {
-                return NotFound();
+                var organization = await _organizationService.GetOrganizationByIdAsync(id);
+                if (organization == null)
+                {
+                    TempData["Error"] = "Organizasyon bulunamadı.";
+                    return RedirectToAction(nameof(Index));
+                }
+                return View(organization);
             }
-
-            return View(organization);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Organizasyon detay sayfası açılırken hata oluştu. Id: {Id}", id);
+                TempData["Error"] = "Organizasyon bilgileri alınırken hata oluştu.";
+                return RedirectToAction(nameof(Index));
+            }
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAllOrganizations()
         {
-            var organizations = await _context.Organizations.ToListAsync();
-            return Json(organizations.Select(o => new { o.Id, o.Name }));
-        }
-
-        private bool OrganizationExists(int id)
-        {
-            return _context.Organizations.Any(e => e.Id == id);
+            try
+            {
+                var organizations = await _organizationService.GetAllOrganizationsAsync();
+                return Json(organizations.Select(o => new { o.Id, o.Name }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetAllOrganizations API'si çalışırken hata oluştu");
+                return Json(new List<object>());
+            }
         }
 
         public async Task<IActionResult> Profit(int id)
         {
-            // Calculate profit logic should be implemented here
-            return View();
+            try
+            {
+                var organization = await _organizationService.GetOrganizationByIdAsync(id);
+                if (organization == null)
+                {
+                    TempData["Error"] = "Organizasyon bulunamadı.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                var profit = await _organizationService.CalculateOrganizationProfitAsync(id);
+                return View(profit);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Organizasyon kar analizi hesaplanırken hata oluştu. Id: {Id}", id);
+                TempData["Error"] = "Kar analizi hesaplanırken hata oluştu.";
+                return RedirectToAction(nameof(Index));
+            }
         }
     }
 } 
