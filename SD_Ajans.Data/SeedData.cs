@@ -10,7 +10,7 @@ namespace SD_Ajans.Data
             if (context.Users.Any())
                 return;
 
-            var roles = new[] { "Admin" };
+            var roles = new[] { "Admin", "Manager", "User" };
 
             foreach (var role in roles)
             {
@@ -27,7 +27,9 @@ namespace SD_Ajans.Data
                 FirstName = "Admin",
                 LastName = "User",
                 Role = UserRole.Admin,
-                EmailConfirmed = true
+                EmailConfirmed = true,
+                CreatedAt = DateTime.Now,
+                IsActive = true
             };
 
             if (await userManager.FindByEmailAsync(adminUser.Email) == null)
@@ -201,14 +203,14 @@ namespace SD_Ajans.Data
                         StartTime = organizations[0].Date,
                         EndTime = organizations[0].Date.AddDays(1),
                         NumberOfDays = 1,
-                        DailyRate = 40,
-                        TotalPayment = 40,
+                        DailyRate = 400, // Günlük ücret
+                        TotalPayment = 400, // Günlük ücret * gün sayısı
                         Status = AssignmentStatus.Scheduled,
                         IncludesMeal = true,
                         IncludesAccommodation = false,
-                        MealCost = 10,
+                        MealCost = 100, // Günlük yemek maliyeti
                         AccommodationCost = 0,
-                        Fee = 50,
+                        Fee = 500, // Toplam ücret (günlük ücret + yemek)
                         Notes = "Kozmetik ürün tanıtımı için günlük çalışma",
                         IsActive = true,
                         CreatedAt = DateTime.Now,
@@ -221,14 +223,14 @@ namespace SD_Ajans.Data
                         StartTime = organizations[1].Date,
                         EndTime = organizations[1].Date.AddDays(1),
                         NumberOfDays = 1,
-                        DailyRate = 100,
-                        TotalPayment = 100,
+                        DailyRate = 1000, // Günlük ücret
+                        TotalPayment = 1000, // Günlük ücret * gün sayısı
                         Status = AssignmentStatus.Scheduled,
                         IncludesMeal = true,
                         IncludesAccommodation = true,
-                        MealCost = 40,
-                        AccommodationCost = 200,
-                        Fee = 340,
+                        MealCost = 200, // Günlük yemek maliyeti
+                        AccommodationCost = 500, // Günlük konaklama maliyeti
+                        Fee = 1700, // Toplam ücret (günlük ücret + yemek + konaklama)
                         Notes = "Düğün töreninde İngilizce hosteslik",
                         IsActive = true,
                         CreatedAt = DateTime.Now,
@@ -241,14 +243,14 @@ namespace SD_Ajans.Data
                         StartTime = organizations[2].Date,
                         EndTime = organizations[2].Date.AddDays(7),
                         NumberOfDays = 7,
-                        DailyRate = 160, // %20 of 8000 / 7 days
-                        TotalPayment = 1120,
+                        DailyRate = 800, // Günlük ücret
+                        TotalPayment = 5600, // Günlük ücret * gün sayısı
                         Status = AssignmentStatus.Scheduled,
                         IncludesMeal = true,
                         IncludesAccommodation = true,
-                        MealCost = 280, // 7 days * 40 TL
-                        AccommodationCost = 1400, // 7 days * 200 TL
-                        Fee = 2800,
+                        MealCost = 1400, // 7 gün * 200 TL
+                        AccommodationCost = 3500, // 7 gün * 500 TL
+                        Fee = 10500, // Toplam ücret (günlük ücret + yemek + konaklama)
                         Notes = "Tatil köyünde animatör olarak 1 hafta",
                         IsActive = true,
                         CreatedAt = DateTime.Now,
@@ -266,7 +268,7 @@ namespace SD_Ajans.Data
                     {
                         AssignmentId = assignments[0].Id,
                         OrganizationId = organizations[0].Id,
-                        Amount = 50,
+                        Amount = 500,
                         PaymentType = PaymentType.Cash,
                         PaymentDate = DateTime.Now.AddDays(-5),
                         Status = PaymentStatus.Completed,
@@ -281,7 +283,7 @@ namespace SD_Ajans.Data
                     {
                         AssignmentId = assignments[0].Id,
                         OrganizationId = organizations[0].Id,
-                        Amount = 40,
+                        Amount = 400,
                         PaymentType = PaymentType.BankTransfer,
                         PaymentDate = DateTime.Now.AddDays(-4),
                         Status = PaymentStatus.Completed,
@@ -296,7 +298,7 @@ namespace SD_Ajans.Data
                     {
                         AssignmentId = assignments[1].Id,
                         OrganizationId = organizations[1].Id,
-                        Amount = 340,
+                        Amount = 1700,
                         PaymentType = PaymentType.Cash,
                         PaymentDate = DateTime.Now.AddDays(-3),
                         Status = PaymentStatus.Completed,
@@ -311,7 +313,7 @@ namespace SD_Ajans.Data
                     {
                         AssignmentId = assignments[1].Id,
                         OrganizationId = organizations[1].Id,
-                        Amount = 100,
+                        Amount = 1000,
                         PaymentType = PaymentType.BankTransfer,
                         PaymentDate = DateTime.Now.AddDays(-2),
                         Status = PaymentStatus.Completed,
