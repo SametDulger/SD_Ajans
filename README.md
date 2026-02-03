@@ -193,12 +193,6 @@ ENTRYPOINT ["dotnet", "SD_Ajans.Web.dll"]
 
 Bu proje MIT lisansı altında lisanslanmıştır. Detaylar için [LICENSE](LICENSE) dosyasına bakın.
 
-## 📞 İletişim
-
-- **Proje Sahibi**: [Your Name]
-- **Email**: [your.email@example.com]
-- **GitHub**: [@your-username]
-
 ## 🔄 Changelog
 
 ### v1.0.0 (2024-01-XX)
